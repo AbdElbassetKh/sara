@@ -134,3 +134,28 @@
 - [x] Intégrer `ChildPhotoEditor` dans Settings.tsx (section "Profils enfants")
 - [x] 0 erreur TypeScript après modifications
 - [x] 15 tests passants
+
+## Phase 21 : Mise à jour page Premium (Gratuit + 500 DA/mois + 4000 DA/an)
+- [x] Lire et analyser la page Premium existante
+- [x] Ajouter un plan "Gratuit" bien visible en haut (bandeau vert)
+- [x] Mettre à jour le plan mensuel à 500 DA/mois
+- [x] Mettre à jour le plan annuel à 4 000 DA/an
+- [x] Mettre à jour les traductions FR/EN/AR pour les plans
+- [x] 0 erreur TypeScript · 15 tests passants
+
+## Phase 22 : Correction complète du système de langue
+- [ ] Auditer LanguageContext et translations.ts
+- [ ] Corriger les textes hardcodés dans toutes les pages
+- [ ] S'assurer que le changement de langue est réactif partout
+- [ ] Vérifier la direction RTL pour l'arabe dans toutes les pages
+- [ ] 0 erreur TypeScript
+
+## Phase 23 : Rendez-vous médicaux avec rappels
+- [x] Ajouter table `appointments` dans drizzle/schema.ts
+- [x] Générer et appliquer la migration SQL
+- [x] Procédures tRPC (create, list, update, delete, getNext, getUpcoming)
+- [x] Créer la page Appointments.tsx (liste + formulaire + rappels toggle)
+- [x] Ajouter le widget "Prochain RDV" dans le Dashboard
+- [x] Ajouter le bouton Rendez-vous dans les Quick Actions du Dashboard
+- [x] Système de rappel : notification créée automatiquement 24h avant le RDV
+- [x] 0 erreur TypeScript · 21 tests passants

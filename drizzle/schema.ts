@@ -244,3 +244,23 @@ export const paymentHistory = mysqlTable("payment_history", {
 
 export type PaymentHistory = typeof paymentHistory.$inferSelect;
 export type InsertPaymentHistory = typeof paymentHistory.$inferInsert;
+
+// Doctor appointments
+export const appointments = mysqlTable("appointments", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  userId: int("userId").notNull(),
+  doctorName: varchar("doctorName", { length: 255 }).notNull(),
+  specialty: varchar("specialty", { length: 100 }),
+  appointmentDate: timestamp("appointmentDate").notNull(),
+  location: varchar("location", { length: 255 }),
+  notes: text("notes"),
+  status: mysqlEnum("status", ["upcoming", "completed", "cancelled"]).default("upcoming").notNull(),
+  reminderSent: int("reminderSent").default(0),
+  reminderAt: timestamp("reminderAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Appointment = typeof appointments.$inferSelect;
+export type InsertAppointment = typeof appointments.$inferInsert;

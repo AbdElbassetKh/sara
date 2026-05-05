@@ -29,6 +29,7 @@ const RateApp = lazy(() => import('./pages/RateApp'));
 const ExportReport = lazy(() => import('./pages/ExportReport'));
 const Legal = lazy(() => import('./pages/Legal'));
 const Notifications = lazy(() => import('./pages/Notifications'));
+const Appointments = lazy(() => import('./pages/Appointments'));
 
 function Router() {
   const { isAuthenticated, loading } = useAuth();
@@ -74,6 +75,7 @@ function Router() {
           <Route path="/legal/terms">{() => <Legal page="terms" />}</Route>
           <Route path="/legal/partners">{() => <Legal page="partners" />}</Route>
           <Route path="/notifications" component={Notifications} />
+          <Route path="/appointments" component={Appointments} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>

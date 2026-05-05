@@ -1,14 +1,56 @@
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAppContext } from '@/contexts/AppContext';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import {
   Apple, AlertCircle, TrendingUp, Stethoscope, Activity,
   Syringe, Sun, Crown, Bell, ChevronRight, Heart, Shield,
-  Baby, Plus
+  Baby, Plus, Calendar
 } from 'lucide-react';
 
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
+
+function NextAppointmentWidget() {
+  const { language } = useLanguage();
+  const { selectedChild } = useAppContext();
+  const [, setLocation] = useLocation();
+  const childId = selectedChild?.id ?? 0;
+
+  const { data: nextAppt } = trpc.appointments.getNext.useQuery(
+    { childId },
+    { enabled: childId > 0, retry: false }
+  );
+
+  if (!nextAppt) return null;
+
+  const apptDate = new Date(nextAppt.appointmentDate);
+  const diffDays = Math.ceil((apptDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const dateStr = apptDate.toLocaleDateString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeStr = apptDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+  return (
+    <div
+      className="bg-gradient-to-r from-cyan-500 to-sky-600 rounded-2xl p-4 flex items-center gap-4 cursor-pointer shadow-md"
+      onClick={() => setLocation('/appointments')}
+    >
+      <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+        <Calendar className="w-7 h-7 text-white" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-white/80 text-xs font-medium">
+          {language === 'fr' ? 'Prochain rendez-vous' : language === 'ar' ? 'الموعد القادم' : 'Next Appointment'}
+          {diffDays === 0 ? ` — ${language === 'fr' ? "Aujourd'hui" : language === 'ar' ? 'اليوم' : 'Today'}` :
+           diffDays === 1 ? ` — ${language === 'fr' ? 'Demain' : language === 'ar' ? 'غداً' : 'Tomorrow'}` :
+           ` — ${language === 'fr' ? `Dans ${diffDays}j` : language === 'ar' ? `بعد ${diffDays} أيام` : `In ${diffDays}d`}`}
+        </p>
+        <p className="text-white font-bold text-sm truncate">{nextAppt.doctorName}</p>
+        <p className="text-white/80 text-xs">{dateStr} · {timeStr}</p>
+      </div>
+      <ChevronRight className="w-5 h-5 text-white/80 flex-shrink-0" />
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { t, language } = useLanguage();
@@ -33,6 +75,7 @@ export default function Dashboard() {
     { icon: Syringe,     label: t('actionVaccines'),    bg: 'bg-teal-100',   iconColor: 'text-teal-600',   path: '/vaccines' },
     { icon: Activity,    label: language==='fr'?'Croissance':language==='ar'?'النمو':'Growth', bg: 'bg-orange-100', iconColor: 'text-orange-600', path: '/growth' },
     { icon: Sun,         label: language==='fr'?'Bilan du jour':language==='ar'?'بيلان اليوم':'Daily Check-in', bg: 'bg-yellow-100', iconColor: 'text-yellow-600', path: '/daily-checkin' },
+    { icon: Calendar,    label: language==='fr'?'Rendez-vous':language==='ar'?'المواعيد':'Appointments', bg: 'bg-cyan-100', iconColor: 'text-cyan-600', path: '/appointments' },
   ];
 
   const STATS = [
@@ -132,6 +175,9 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+
+        {/* ── Prochain RDV Widget ── */}
+        <NextAppointmentWidget />
 
         {/* ── Premium Banner ── */}
         <div

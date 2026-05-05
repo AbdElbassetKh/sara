@@ -132,6 +132,25 @@ export default function Premium() {
 
         {!isPremium && (
           <>
+            {/* Gratuit banner */}
+            <div className="flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-3">
+              <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Check className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-green-800">
+                  {language === 'fr' ? 'AlleNest est gratuit ✔️' : language === 'ar' ? 'AlleNest مجاني ✔️' : 'AlleNest is free ✔️'}
+                </p>
+                <p className="text-xs text-green-700">
+                  {language === 'fr'
+                    ? 'Utilisez l’app sans frais. Le Premium est optionnel pour plus de fonctionnalités.'
+                    : language === 'ar'
+                    ? 'استخدم التطبيق مجاناً. المميز اختياري لمزيد من الميزات.'
+                    : 'Use the app for free. Premium is optional for more features.'}
+                </p>
+              </div>
+            </div>
+
             {/* Plan Toggle */}
             <div className="flex bg-muted rounded-2xl p-1">
               <button
@@ -158,11 +177,17 @@ export default function Premium() {
             {/* Pricing Card */}
             <Card className="p-6 border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5 shadow-lg">
               <div className="text-center space-y-2">
+                {/* Plan label */}
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  {selectedPlan === 'monthly'
+                    ? (language === 'fr' ? 'Abonnement Premium mensuel' : language === 'ar' ? 'اشتراك مميز شهري' : 'Monthly Premium subscription')
+                    : (language === 'fr' ? 'Abonnement Premium annuel' : language === 'ar' ? 'اشتراك مميز سنوي' : 'Yearly Premium subscription')}
+                </p>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-4xl font-black text-foreground">
                     {selectedPlan === 'monthly' ? '500' : '4 000'}
                   </span>
-                  <span className="text-lg font-semibold text-muted-foreground">DZD</span>
+                  <span className="text-lg font-semibold text-muted-foreground">DA</span>
                   <span className="text-sm text-muted-foreground">
                     / {selectedPlan === 'monthly'
                       ? (language === 'fr' ? 'mois' : language === 'ar' ? 'شهر' : 'month')
@@ -171,7 +196,7 @@ export default function Premium() {
                 </div>
                 {selectedPlan === 'yearly' && (
                   <p className="text-sm text-green-600 font-medium">
-                    {language === 'fr' ? 'Économisez 2 000 DZD/an' : language === 'ar' ? 'وفر 2000 دج/سنة' : 'Save 2,000 DZD/year'}
+                    {language === 'fr' ? 'Économisez 2 000 DA/an (équivaut à 2 mois offerts)' : language === 'ar' ? 'وفر 2000 دج/سنة (شهران مجاناً)' : 'Save 2,000 DA/year (2 months free)'}
                   </p>
                 )}
                 <Button
@@ -192,9 +217,9 @@ export default function Premium() {
                   )}
                 </Button>
                 <p className="text-xs text-muted-foreground">
-                  {language === 'fr' ? 'Annulation possible à tout moment' :
-                   language === 'ar' ? 'يمكن الإلغاء في أي وقت' :
-                   'Cancel anytime'}
+                  {language === 'fr' ? 'Annulation possible à tout moment · L’app reste gratuite sans Premium' :
+                   language === 'ar' ? 'يمكن الإلغاء في أي وقت · التطبيق يظل مجانياً بدون اشتراك' :
+                   'Cancel anytime · App stays free without Premium'}
                 </p>
               </div>
             </Card>

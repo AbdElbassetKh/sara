@@ -27,6 +27,7 @@ const translations = {
     navTimeline: 'Timeline',
     navInsights: 'Insights',
     navAdvice: 'Advice',
+    navAlerts: 'Alerts',
     navSettings: 'Settings',
 
     // Dashboard
@@ -258,6 +259,7 @@ const translations = {
     navTimeline: 'Chronologie',
     navInsights: 'Analyses',
     navAdvice: 'Conseils',
+    navAlerts: 'Alertes',
     navSettings: 'Paramètres',
 
     // Dashboard
@@ -489,6 +491,7 @@ const translations = {
     navTimeline: 'الجدول الزمني',
     navInsights: 'التحليلات',
     navAdvice: 'النصائح',
+    navAlerts: 'تنبيهات',
     navSettings: 'الإعدادات',
 
     // Dashboard

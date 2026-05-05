@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function BottomNavigation() {
   const [location] = useLocation();
-  const { t, language } = useLanguage();
+  const { t } = useLanguage();
 
   const NAV_ITEMS = [
     {
@@ -34,7 +34,7 @@ export default function BottomNavigation() {
     {
       path: '/notifications',
       icon: Bell,
-      label: language === 'fr' ? 'Alertes' : language === 'ar' ? 'تنبيهات' : 'Alerts',
+      label: t('navAlerts'),
       activeColor: 'text-amber-500',
       activeBg: 'bg-amber-50',
       dotColor: 'bg-amber-500',
