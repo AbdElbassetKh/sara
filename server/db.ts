@@ -103,10 +103,15 @@ export async function getChildById(childId: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function createChild(data: InsertChild) {
+export async function createChild(data: Omit<InsertChild, 'birthDate'> & { birthDate: string | Date }) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  const result = await db.insert(children).values(data);
+  // Ensure birthDate is a proper Date object for Drizzle
+  const birthDate =
+    typeof data.birthDate === 'string'
+      ? new Date(data.birthDate + 'T12:00:00Z')  // noon UTC to avoid timezone shifts
+      : data.birthDate;
+  const result = await db.insert(children).values({ ...data, birthDate } as InsertChild);
   return result;
 }
 

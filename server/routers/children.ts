@@ -18,7 +18,8 @@ export const childrenRouter = router({
     .input(
       z.object({
         name: z.string().min(1),
-        birthDate: z.string().transform(v => new Date(v)),
+        // Accept YYYY-MM-DD string; keep as string for MySQL date column
+        birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format YYYY-MM-DD requis"),
         gender: z.enum(["boy", "girl"]),
         feedingType: z.enum(["breast", "formula", "mixed", "solids"]).optional(),
         allergies: z.array(z.string()).default([]),
@@ -26,13 +27,24 @@ export const childrenRouter = router({
         emergencyContact: z
           .object({ name: z.string(), phone: z.string() })
           .optional(),
+        // photoUrl is handled separately via uploadPhoto; ignore large base64 here
         photoUrl: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Separate the photo from the child data to avoid sending large base64 to DB
+      const { photoUrl, ...childData } = input;
+
+      // Only store a photoUrl if it looks like a real URL (not raw base64)
+      const safePhotoUrl =
+        photoUrl && (photoUrl.startsWith('/') || photoUrl.startsWith('http'))
+          ? photoUrl
+          : undefined;
+
       await createChild({
         userId: ctx.user.id,
-        ...input,
+        ...childData,
+        ...(safePhotoUrl ? { photoUrl: safePhotoUrl } : {}),
       });
       // Fetch the newly created child to return full data with ID
       const allChildren = await getChildrenByUserId(ctx.user.id);

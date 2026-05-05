@@ -84,16 +84,22 @@ export default function ChildProfileSetup() {
     e.preventDefault();
     if (!formData.name || !formData.birthDate || !formData.gender) return;
     setIsLoading(true);
+
+    // Ensure birthDate is in YYYY-MM-DD format
+    const birthDateStr = formData.birthDate.includes('T')
+      ? formData.birthDate.split('T')[0]
+      : formData.birthDate;
+
     createChild.mutate({
       name: formData.name,
-      birthDate: formData.birthDate,
+      birthDate: birthDateStr,
       gender: formData.gender as 'boy' | 'girl',
       feedingType: formData.feedingType as 'breast' | 'formula' | 'mixed' | 'solids' | undefined || undefined,
       allergies: formData.allergies,
       emergencyContact: formData.emergencyContactName
         ? { name: formData.emergencyContactName, phone: formData.emergencyContactPhone }
         : undefined,
-      photoUrl: photoPreview ?? undefined,
+      // Do NOT send base64 photo here — use uploadPhoto after child is created
     });
   };
 
