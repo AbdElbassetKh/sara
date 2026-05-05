@@ -159,19 +159,19 @@ export default function Onboarding() {
 
         {/* Family illustration — bottom aligned, partially clipped */}
         <div className="relative z-10 flex items-end justify-center w-full" style={{ height: '220px', marginTop: '8px' }}>
-          {/* Baby hero on the right */}
+          {/* Baby hero on the right — mix-blend-mode:multiply removes white background */}
           <img
             src={BABY_HERO_IMG}
             alt="Baby"
-            className="absolute right-4 bottom-0 object-contain drop-shadow-2xl"
-            style={{ height: '180px', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.15))' }}
+            className="absolute right-4 bottom-0 object-contain"
+            style={{ height: '180px', mixBlendMode: 'multiply' }}
           />
           {/* Family on the left/center */}
           <img
             src={FAMILY_IMG}
             alt="Family"
-            className="absolute left-0 bottom-0 object-contain drop-shadow-2xl"
-            style={{ height: '210px', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.12))' }}
+            className="absolute left-0 bottom-0 object-contain"
+            style={{ height: '210px', mixBlendMode: 'multiply' }}
           />
         </div>
       </div>
