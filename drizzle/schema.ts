@@ -183,3 +183,64 @@ export const notifications = mysqlTable("notifications", {
 
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+// ─── NEW TABLES for Premium/Freemium, Daily Check-ins, Feedback ──────────────
+
+// User subscription / premium status
+export const subscriptions = mysqlTable("subscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  plan: mysqlEnum("plan", ["free", "monthly", "yearly"]).default("free").notNull(),
+  status: mysqlEnum("status", ["active", "expired", "cancelled", "pending"]).default("active").notNull(),
+  premiumUntil: timestamp("premiumUntil"),
+  aiAnalysesUsedToday: int("aiAnalysesUsedToday").default(0),
+  aiAnalysesResetAt: timestamp("aiAnalysesResetAt").defaultNow(),
+  paymentRef: varchar("paymentRef", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = typeof subscriptions.$inferInsert;
+
+// Daily check-ins
+export const dailyCheckins = mysqlTable("daily_checkins", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  userId: int("userId").notNull(),
+  checkinDate: date("checkinDate").notNull(),
+  hasSymptoms: int("hasSymptoms").default(0).notNull(), // 0=no, 1=yes
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type DailyCheckin = typeof dailyCheckins.$inferSelect;
+export type InsertDailyCheckin = typeof dailyCheckins.$inferInsert;
+
+// User feedback / ratings
+export const feedbacks = mysqlTable("feedbacks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  rating: int("rating").notNull(), // 1-5
+  comment: text("comment"),
+  appVersion: varchar("appVersion", { length: 20 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Feedback = typeof feedbacks.$inferSelect;
+export type InsertFeedback = typeof feedbacks.$inferInsert;
+
+// Payment history (simulated for MVP)
+export const paymentHistory = mysqlTable("payment_history", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  amount: int("amount").notNull(), // in DZD
+  currency: varchar("currency", { length: 10 }).default("DZD"),
+  plan: mysqlEnum("plan", ["monthly", "yearly"]).notNull(),
+  status: mysqlEnum("status", ["pending", "completed", "failed", "refunded"]).default("pending").notNull(),
+  paymentMethod: varchar("paymentMethod", { length: 50 }),
+  transactionRef: varchar("transactionRef", { length: 255 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type PaymentHistory = typeof paymentHistory.$inferSelect;
+export type InsertPaymentHistory = typeof paymentHistory.$inferInsert;

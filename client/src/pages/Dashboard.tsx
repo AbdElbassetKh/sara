@@ -9,6 +9,8 @@ import {
   Activity,
   Syringe,
   Plus,
+  Sun,
+  Crown,
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 
@@ -29,6 +31,8 @@ export default function Dashboard() {
     { icon: Stethoscope, label: t('actionDoctor'), color: 'text-purple-600', path: '/doctor' },
     { icon: Activity, label: t('actionGrowth'), color: 'text-orange-600', path: '/growth' },
     { icon: Syringe, label: t('actionVaccines'), color: 'text-pink-600', path: '/vaccines' },
+    { icon: Sun, label: language === 'fr' ? 'Bilan du jour' : language === 'ar' ? 'بيلان اليوم' : 'Daily Check-in', color: 'text-yellow-600', path: '/daily-checkin' },
+    { icon: Crown, label: language === 'fr' ? 'Premium' : language === 'ar' ? 'المميز' : 'Premium', color: 'text-amber-600', path: '/premium' },
   ];
 
   return (

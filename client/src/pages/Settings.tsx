@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@/const';
-import { LogOut, Bell, Globe, Lock, Info } from 'lucide-react';
+import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, Users, ChevronRight } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useLocation } from 'wouter';
 
@@ -118,6 +118,78 @@ export default function Settings() {
           </div>
         </Card>
 
+        {/* Premium */}
+        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/premium')}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <Crown size={18} className="text-yellow-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">
+                {language === 'fr' ? 'AlleNest Premium' : language === 'ar' ? 'AlleNest المميز' : 'AlleNest Premium'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'fr' ? 'Débloquez toutes les fonctionnalités' : language === 'ar' ? 'افتح جميع الميزات' : 'Unlock all features'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </div>
+        </Card>
+
+        {/* Daily Check-in */}
+        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/daily-checkin')}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+              <Sun size={18} className="text-green-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">
+                {language === 'fr' ? 'Bilan quotidien' : language === 'ar' ? 'التسجيل اليومي' : 'Daily Check-in'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'fr' ? 'Suivi jour par jour' : language === 'ar' ? 'التتبع يوما بيوم' : 'Day-by-day tracking'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </div>
+        </Card>
+
+        {/* Export Report */}
+        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/export')}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <FileText size={18} className="text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">
+                {language === 'fr' ? 'Exporter un rapport' : language === 'ar' ? 'تصدير تقرير' : 'Export Report'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'fr' ? 'Télécharger les données de santé' : language === 'ar' ? 'تنزيل بيانات الصحة' : 'Download health data'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </div>
+        </Card>
+
+        {/* Rate App */}
+        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/rate')}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
+              <Star size={18} className="text-orange-500" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground">
+                {language === 'fr' ? 'Évaluer l\'application' : language === 'ar' ? 'تقييم التطبيق' : 'Rate the App'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {language === 'fr' ? 'Donnez votre avis' : language === 'ar' ? 'أعطِ رأيك' : 'Share your feedback'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-muted-foreground" />
+          </div>
+        </Card>
+
         {/* About Section */}
         <Card className="p-5 space-y-3 shadow-sm">
           <div className="flex items-center gap-2">
@@ -147,13 +219,16 @@ export default function Settings() {
         {/* Footer */}
         <div className="text-center space-y-2 text-xs text-muted-foreground pb-4">
           <p>© 2026 AlleNest. All rights reserved.</p>
-          <div className="flex justify-center gap-4">
-            <a href="#" className="hover:text-foreground transition-colors">
+          <div className="flex justify-center gap-4 flex-wrap">
+            <button onClick={() => setLocation('/legal/privacy')} className="hover:text-foreground transition-colors">
               {t('privacyPolicy')}
-            </a>
-            <a href="#" className="hover:text-foreground transition-colors">
+            </button>
+            <button onClick={() => setLocation('/legal/terms')} className="hover:text-foreground transition-colors">
               {t('termsOfService')}
-            </a>
+            </button>
+            <button onClick={() => setLocation('/legal/partners')} className="hover:text-foreground transition-colors">
+              {language === 'fr' ? 'Partenaires' : language === 'ar' ? 'الشركاء' : 'Partners'}
+            </button>
           </div>
         </div>
       </div>

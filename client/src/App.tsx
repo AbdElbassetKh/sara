@@ -23,6 +23,11 @@ const Timeline = lazy(() => import('./pages/Timeline'));
 const Insights = lazy(() => import('./pages/Insights'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Doctor = lazy(() => import('./pages/Doctor'));
+const Premium = lazy(() => import('./pages/Premium'));
+const DailyCheckin = lazy(() => import('./pages/DailyCheckin'));
+const RateApp = lazy(() => import('./pages/RateApp'));
+const ExportReport = lazy(() => import('./pages/ExportReport'));
+const Legal = lazy(() => import('./pages/Legal'));
 
 function Router() {
   const { isAuthenticated, loading } = useAuth();
@@ -60,6 +65,13 @@ function Router() {
           <Route path="/insights" component={Insights} />
           <Route path="/settings" component={Settings} />
           <Route path="/doctor" component={Doctor} />
+          <Route path="/premium" component={Premium} />
+          <Route path="/daily-checkin" component={DailyCheckin} />
+          <Route path="/rate" component={RateApp} />
+          <Route path="/export" component={ExportReport} />
+          <Route path="/legal/privacy">{() => <Legal page="privacy" />}</Route>
+          <Route path="/legal/terms">{() => <Legal page="terms" />}</Route>
+          <Route path="/legal/partners">{() => <Legal page="partners" />}</Route>
           <Route component={NotFound} />
         </Switch>
       </Suspense>

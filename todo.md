@@ -95,3 +95,16 @@
 - [ ] Vérifier l'accessibilité
 - [x] Créer les tests Vitest
 - [ ] Optimiser les performances
+
+## Phase 17 : Fonctionnalités Premium et Nouvelles Pages
+- [x] Implémenter le système Premium/Freemium (abonnement mensuel/annuel)
+- [x] Créer la page Premium avec plans tarifaires (500 DZD/mois, 4000 DZD/an)
+- [x] Implémenter le Daily Check-in avec historique 30 jours et streak
+- [x] Créer la page d'évaluation (RateApp) avec étoiles et commentaires
+- [x] Créer les pages légales (Politique de confidentialité, CGU, Partenaires)
+- [x] Créer la page d'export de rapport HTML
+- [x] Ajouter les nouvelles tables DB (subscriptions, daily_checkins, feedbacks, payment_history)
+- [x] Ajouter les liens dans Settings et Dashboard vers les nouvelles pages
+- [x] Créer les tests unitaires pour le routeur premium (5 tests)
+- [x] Corriger les traductions FR/AR dans toutes les pages
+- [x] Intégrer le logo AlleNest dans l'application
