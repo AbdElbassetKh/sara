@@ -108,3 +108,12 @@
 - [x] Créer les tests unitaires pour le routeur premium (5 tests)
 - [x] Corriger les traductions FR/AR dans toutes les pages
 - [x] Intégrer le logo AlleNest dans l'application
+
+## Phase 18 : Signature Officielle et Thème Vivid
+- [x] Ajouter la clé `appSignature` dans translations.ts (EN/FR/AR)
+- [x] Intégrer la signature dans Onboarding.tsx (carte gradient sous le tagline)
+- [x] Intégrer la signature dans Dashboard.tsx (header, texte blanc italique)
+- [x] Intégrer la signature dans Settings.tsx (About card + footer gradient)
+- [x] Intégrer la signature dans ChildProfileSetup.tsx (header + footer)
+- [x] 0 erreur TypeScript après toutes les modifications
+- [x] 15 tests unitaires passants

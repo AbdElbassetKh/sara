@@ -97,6 +97,10 @@ export default function ChildProfileSetup() {
           <p className="text-sm text-muted-foreground">
             {language === 'fr' ? "Aidez-nous à mieux connaître votre enfant" : language === 'ar' ? 'ساعدنا على التعرف على طفلك بشكل أفضل' : "Help us know your child better"}
           </p>
+          {/* Signature officielle */}
+          <p className="text-[11px] font-medium italic text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-pink-500 pt-1">
+            {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -223,6 +227,13 @@ export default function ChildProfileSetup() {
             {isLoading ? t('saving') : t('saveProfile')}
             {!isLoading && <ArrowRight size={18} />}
           </Button>
+
+          {/* Footer Signature */}
+          <div className="text-center pb-2">
+            <p className="text-[11px] font-medium italic text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-pink-500">
+              ✨ {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'} ✨
+            </p>
+          </div>
         </form>
       </div>
     </div>

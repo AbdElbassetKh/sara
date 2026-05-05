@@ -203,6 +203,12 @@ export default function Settings() {
               <p className="text-xs text-muted-foreground">{t('version')} 1.0.0 · Build 2026.05.05</p>
             </div>
           </div>
+          {/* Signature officielle */}
+          <div className="bg-gradient-to-r from-sky-50 to-pink-50 border border-sky-100 rounded-xl px-4 py-3 text-center">
+            <p className="text-xs font-semibold italic text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-pink-600">
+              ✨ {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'} ✨
+            </p>
+          </div>
         </Card>
 
         {/* Logout Button */}
@@ -218,6 +224,9 @@ export default function Settings() {
 
         {/* Footer */}
         <div className="text-center space-y-2 text-xs text-muted-foreground pb-4">
+          <p className="font-medium italic text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-pink-500 text-[11px]">
+            {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'}
+          </p>
           <p>© 2026 AlleNest. All rights reserved.</p>
           <div className="flex justify-center gap-4 flex-wrap">
             <button onClick={() => setLocation('/legal/privacy')} className="hover:text-foreground transition-colors">

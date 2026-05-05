@@ -7,6 +7,7 @@ const translations = {
     // App
     appName: 'AlleNest',
     appTagline: "Nature's Gentle Embrace",
+    appSignature: 'Because every cry of your child has a cause',
     appDescription:
       'Your trusted companion for child health and safety. Manage allergies, track growth, and receive personalized insights powered by AI.',
 
@@ -235,6 +236,7 @@ const translations = {
     // App
     appName: 'AlleNest',
     appTagline: "L'Étreinte Douce de la Nature",
+    appSignature: 'Parce que chaque pleur de votre enfant a une cause',
     appDescription:
       'Votre compagnon de confiance pour la santé et la sécurité de votre enfant. Gérez les allergies, suivez la croissance et recevez des conseils personnalisés par IA.',
 
@@ -465,6 +467,7 @@ const translations = {
     // App
     appName: 'AlleNest',
     appTagline: 'احتضان الطبيعة اللطيف',
+    appSignature: 'لأن كل بكاء طفلك له سبب',
     appDescription:
       'رفيقك الموثوق لصحة وسلامة طفلك. إدارة الحساسية، تتبع النمو، والحصول على توصيات شخصية مدعومة بالذكاء الاصطناعي.',
 

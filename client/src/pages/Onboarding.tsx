@@ -5,7 +5,7 @@ import { Globe, Heart, Shield, Sparkles } from 'lucide-react';
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
 export default function Onboarding() {
-  const { setLanguage } = useLanguage();
+  const { setLanguage, language, t } = useLanguage();
 
   const handleLanguageSelect = (lang: typeof SUPPORTED_LANGUAGES[number]) => {
     setLanguage(lang);
@@ -40,14 +40,26 @@ export default function Onboarding() {
           </div>
         </div>
 
-        {/* Tagline */}
+        {/* Signature */}
         <div className="space-y-2 px-2">
           <h2 className="text-xl font-bold text-gray-800">
             Child Safety AI
           </h2>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            Smart care for your little one, peace of mind for you.
-          </p>
+          {/* Signature officielle */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-sky-100 to-pink-100 blur-sm" />
+            <div className="relative bg-gradient-to-r from-sky-50 to-pink-50 border border-sky-100 rounded-2xl px-4 py-3">
+              <p className="text-sm font-semibold text-gray-700 italic leading-relaxed text-center">
+                <span className="text-sky-500">✨</span>
+                {' '}
+                <span className="bg-gradient-to-r from-sky-600 to-pink-600 bg-clip-text text-transparent font-bold">
+                  {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'}
+                </span>
+                {' '}
+                <span className="text-pink-500">✨</span>
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Features */}

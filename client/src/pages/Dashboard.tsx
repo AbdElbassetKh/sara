@@ -70,6 +70,10 @@ export default function Dashboard() {
               ) : null}
             </button>
           </div>
+          {/* Signature */}
+          <p className="text-white/70 text-xs italic mt-2 font-medium">
+            {language === 'ar' ? '✨ لأن كل بكاء طفلك له سبب' : language === 'fr' ? '✨ Parce que chaque pleur de votre enfant a une cause' : '✨ Because every cry of your child has a cause'}
+          </p>
         </div>
       </div>
 
