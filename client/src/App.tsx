@@ -16,6 +16,13 @@ import { Suspense, lazy } from "react";
 const Meals = lazy(() => import('./pages/Meals'));
 const EmergencyPage = lazy(() => import('./pages/EmergencyPage'));
 const Advice = lazy(() => import('./pages/Advice'));
+const Symptoms = lazy(() => import('./pages/Symptoms'));
+const Growth = lazy(() => import('./pages/Growth'));
+const Vaccines = lazy(() => import('./pages/Vaccines'));
+const Timeline = lazy(() => import('./pages/Timeline'));
+const Insights = lazy(() => import('./pages/Insights'));
+const Settings = lazy(() => import('./pages/Settings'));
+const Doctor = lazy(() => import('./pages/Doctor'));
 
 function Router() {
   const { isAuthenticated, loading } = useAuth();
@@ -46,9 +53,13 @@ function Router() {
           <Route path="/meals" component={Meals} />
           <Route path="/emergency" component={EmergencyPage} />
           <Route path="/advice" component={Advice} />
-          <Route path="/timeline" component={() => <div className="p-4 pb-24">Timeline</div>} />
-          <Route path="/insights" component={() => <div className="p-4 pb-24">Insights</div>} />
-          <Route path="/settings" component={() => <div className="p-4 pb-24">Settings</div>} />
+          <Route path="/symptoms" component={Symptoms} />
+          <Route path="/growth" component={Growth} />
+          <Route path="/vaccines" component={Vaccines} />
+          <Route path="/timeline" component={Timeline} />
+          <Route path="/insights" component={Insights} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/doctor" component={Doctor} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>

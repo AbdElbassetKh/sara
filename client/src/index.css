@@ -196,7 +196,7 @@
   }
 
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around items-center safe-area-inset-bottom;
+    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around items-center pb-4;
   }
 
   .bottom-nav-item {

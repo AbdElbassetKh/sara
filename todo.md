@@ -32,48 +32,48 @@
 - [x] Sauvegarder les entrées de repas en base de données
 
 ## Phase 6 : Suivi des Symptômes
-- [ ] Implémenter l'interface de suivi des symptômes (grille, curseur de sévérité)
-- [ ] Créer le système de corrélation symptômes-repas
-- [ ] Afficher l'historique des symptômes
+- [x] Implémenter l'interface de suivi des symptômes (grille, curseur de sévérité)
+- [x] Créer le système de corrélation symptômes-repas
+- [x] Afficher l'historique des symptômes
 - [ ] Permettre l'upload de photos et notes
 
 ## Phase 7 : Chronologie et Filtres
-- [ ] Implémenter la page Timeline avec filtres (mois, type)
-- [ ] Afficher les entrées chronologiques avec badges colorés
+- [x] Implémenter la page Timeline avec filtres (mois, type)
+- [x] Afficher les entrées chronologiques avec badges colorés
 - [ ] Permettre la modification et suppression des entrées
 
 ## Phase 8 : Insights IA et Rapports
-- [ ] Implémenter l'appel LLM pour analyse des 30 derniers jours
-- [ ] Afficher le niveau de risque et aliments probables
+- [x] Implémenter l'appel LLM pour analyse des 30 derniers jours
+- [x] Afficher le niveau de risque et aliments probables
 - [ ] Créer le graphique de consommation vs symptômes
 - [ ] Implémenter l'export PDF des rapports
-- [ ] Ajouter les recommandations personnalisées
+- [x] Ajouter les recommandations personnalisées
 
 ## Phase 9 : Suivi de Croissance
-- [ ] Implémenter l'enregistrement des mesures (poids, taille, périmètre crânien)
-- [ ] Créer les graphiques de courbes de percentiles (Recharts)
-- [ ] Afficher les statistiques de croissance
+- [x] Implémenter l'enregistrement des mesures (poids, taille, périmètre crânien)
+- [x] Créer les graphiques de courbes de percentiles (Recharts)
+- [x] Afficher les statistiques de croissance
 
 ## Phase 10 : Carnet de Vaccination
-- [ ] Implémenter la liste des vaccins avec statuts
-- [ ] Créer le système de rappels (notifications locales)
-- [ ] Afficher le prochain vaccin à faire
+- [x] Implémenter la liste des vaccins avec statuts
+- [x] Créer le système de rappels (notifications locales)
+- [x] Afficher le prochain vaccin à faire
 
 ## Phase 11 : Suivi Médecin et Documents
-- [ ] Implémenter la gestion des visites médicales
+- [x] Implémenter la gestion des visites médicales
 - [ ] Créer l'upload et stockage des prescriptions/documents
 - [ ] Afficher l'historique des visites et prescriptions
 
 ## Phase 12 : Page d'Urgence
-- [ ] Implémenter la page d'urgence (fond rouge, signes de danger)
-- [ ] Ajouter les boutons d'appel (14, 17, personnalisé)
-- [ ] Afficher les protocoles de premiers secours
+- [x] Implémenter la page d'urgence (fond rouge, signes de danger)
+- [x] Ajouter les boutons d'appel (14, 17, personnalisé)
+- [x] Afficher les protocoles de premiers secours
 
 ## Phase 13 : Centre de Conseils
-- [ ] Créer la liste d'articles (au moins 6)
-- [ ] Implémenter les filtres par catégorie
-- [ ] Ajouter la barre de recherche
-- [ ] Créer les modales d'affichage des articles
+- [x] Créer la liste d'articles (au moins 6)
+- [x] Implémenter les filtres par catégorie
+- [x] Ajouter la barre de recherche
+- [x] Créer les modales d'affichage des articles
 
 ## Phase 14 : Notifications et Rappels
 - [ ] Implémenter le système de notifications
@@ -83,15 +83,15 @@
 - [ ] Afficher le centre de notifications
 
 ## Phase 15 : Paramètres et Profil
-- [ ] Implémenter la modification du profil enfant
-- [ ] Créer le sélecteur de langue en temps réel
-- [ ] Ajouter les préférences de notifications
+- [x] Implémenter la modification du profil enfant
+- [x] Créer le sélecteur de langue en temps réel
+- [x] Ajouter les préférences de notifications
 - [ ] Implémenter l'export des données (JSON/CSV)
 - [ ] Ajouter la suppression du compte
 
 ## Phase 16 : Finalisation et Tests
-- [ ] Tester tous les flux utilisateur
-- [ ] Valider la responsivité mobile
+- [x] Tester tous les flux utilisateur
+- [x] Valider la responsivité mobile
 - [ ] Vérifier l'accessibilité
-- [ ] Créer les tests Vitest
+- [x] Créer les tests Vitest
 - [ ] Optimiser les performances
