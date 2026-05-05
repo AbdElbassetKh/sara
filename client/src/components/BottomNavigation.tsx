@@ -1,16 +1,18 @@
 import { Link, useLocation } from 'wouter';
 import { Home, Clock, Lightbulb, BookOpen, Settings } from 'lucide-react';
-
-const NAV_ITEMS = [
-  { path: '/', icon: Home, label: 'Home' },
-  { path: '/timeline', icon: Clock, label: 'Timeline' },
-  { path: '/insights', icon: Lightbulb, label: 'Insights' },
-  { path: '/advice', icon: BookOpen, label: 'Advice' },
-  { path: '/settings', icon: Settings, label: 'Settings' },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function BottomNavigation() {
   const [location] = useLocation();
+  const { t } = useLanguage();
+
+  const NAV_ITEMS = [
+    { path: '/', icon: Home, label: t('navHome') },
+    { path: '/timeline', icon: Clock, label: t('navTimeline') },
+    { path: '/insights', icon: Lightbulb, label: t('navInsights') },
+    { path: '/advice', icon: BookOpen, label: t('navAdvice') },
+    { path: '/settings', icon: Settings, label: t('navSettings') },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border flex justify-around items-center h-20 pb-4 max-w-md mx-auto">
@@ -23,12 +25,12 @@ export default function BottomNavigation() {
             className={`flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium rounded-lg transition-all flex-1 h-full ${
               isActive
                 ? 'bg-primary/10 text-primary'
-                : 'text-muted hover:bg-muted/10'
+                : 'text-muted-foreground hover:bg-muted/10'
             }`}
             title={label}
           >
-            <Icon size={24} />
-            <span className="text-xs">{label}</span>
+            <Icon size={22} />
+            <span className="text-[10px] leading-tight text-center">{label}</span>
           </Link>
         );
       })}

@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { ALLERGEN_LIST, FEEDING_TYPES, GENDER_OPTIONS } from '@/const';
 import { Upload, ArrowRight } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function ChildProfileSetup() {
+  const { t, language } = useLanguage();
   const [formData, setFormData] = useState({
     name: '',
     birthDate: '',
@@ -49,66 +51,91 @@ export default function ChildProfileSetup() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Submit form data to backend
     console.log('Form data:', formData);
     setIsLoading(false);
   };
 
+  const getGenderLabel = (option: string) => {
+    if (option === 'boy') return t('boy');
+    if (option === 'girl') return t('girl');
+    return option;
+  };
+
+  const getFeedingLabel = (option: string) => {
+    const map: Record<string, string> = {
+      breast: t('breast'),
+      formula: t('formula'),
+      mixed: t('mixed'),
+      solids: t('solids'),
+    };
+    return map[option] || option;
+  };
+
+  const getAllergenLabel = (allergen: string) => {
+    const map: Record<string, string> = {
+      milk: t('milk'),
+      egg: t('egg'),
+      peanuts: t('peanuts'),
+      wheat: t('wheat'),
+      fish: t('fish'),
+      soy: t('soy'),
+      berries: t('berries'),
+      shellfish: t('shellfish'),
+      tree_nuts: t('tree_nuts'),
+      sesame: t('sesame'),
+    };
+    return map[allergen] || allergen;
+  };
+
   return (
-    <div className="min-h-screen bg-background p-4 pb-20">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="min-h-screen bg-background pb-20">
+      <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Create Child Profile</h1>
-          <p className="text-muted">Help us know your child better</p>
+        <div className="pt-2 space-y-1">
+          <h1 className="text-2xl font-bold text-foreground">{t('createProfile')}</h1>
+          <p className="text-sm text-muted-foreground">
+            {language === 'fr' ? "Aidez-nous à mieux connaître votre enfant" : language === 'ar' ? 'ساعدنا على التعرف على طفلك بشكل أفضل' : "Help us know your child better"}
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Photo Upload */}
-          <Card className="p-6 space-y-4 border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors">
-            <Label className="text-sm font-medium">Child Photo (Optional)</Label>
+          <Card className="p-5 space-y-4 border-2 border-dashed border-primary/30 hover:border-primary/50 transition-colors shadow-sm">
+            <Label className="text-sm font-semibold">
+              {language === 'fr' ? 'Photo de l\'enfant (optionnel)' : language === 'ar' ? 'صورة الطفل (اختياري)' : 'Child Photo (Optional)'}
+            </Label>
             <div className="flex flex-col items-center gap-4">
               {photoPreview ? (
-                <img src={photoPreview} alt="Child" className="w-24 h-24 rounded-full object-cover" />
+                <img src={photoPreview} alt="Child" className="w-24 h-24 rounded-full object-cover border-4 border-primary/20" />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
                   <Upload size={32} className="text-primary/50" />
                 </div>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="hidden"
-                id="photo-upload"
-              />
+              <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" id="photo-upload" />
               <label htmlFor="photo-upload">
                 <Button type="button" variant="outline" size="sm" asChild>
-                  <span>Upload Photo</span>
+                  <span>{t('addPhoto')}</span>
                 </Button>
               </label>
             </div>
           </Card>
 
           {/* Basic Info */}
-          <Card className="p-6 space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium">
-                Child's Name *
-              </Label>
+          <Card className="p-5 space-y-4 shadow-sm">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-sm font-semibold">{t('childName')} *</Label>
               <Input
                 id="name"
-                placeholder="e.g., Emma"
+                placeholder={language === 'fr' ? 'ex. Emma' : language === 'ar' ? 'مثال: أحمد' : 'e.g., Emma'}
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="birthDate" className="text-sm font-medium">
-                Birth Date *
-              </Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="birthDate" className="text-sm font-semibold">{t('birthDate')} *</Label>
               <Input
                 id="birthDate"
                 type="date"
@@ -118,36 +145,32 @@ export default function ChildProfileSetup() {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="gender" className="text-sm font-medium">
-                Gender *
-              </Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="gender" className="text-sm font-semibold">{t('gender')} *</Label>
               <Select value={formData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
                 <SelectTrigger id="gender">
-                  <SelectValue placeholder="Select gender" />
+                  <SelectValue placeholder={t('selectGender')} />
                 </SelectTrigger>
                 <SelectContent>
                   {GENDER_OPTIONS.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {option === 'boy' ? 'Boy' : 'Girl'}
+                      {getGenderLabel(option)}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="feedingType" className="text-sm font-medium">
-                Feeding Type
-              </Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="feedingType" className="text-sm font-semibold">{t('feedingType')}</Label>
               <Select value={formData.feedingType} onValueChange={(value) => handleInputChange('feedingType', value)}>
                 <SelectTrigger id="feedingType">
-                  <SelectValue placeholder="Select feeding type" />
+                  <SelectValue placeholder={t('selectFeedingType')} />
                 </SelectTrigger>
                 <SelectContent>
                   {FEEDING_TYPES.map((option) => (
                     <SelectItem key={option} value={option}>
-                      {option.charAt(0).toUpperCase() + option.slice(1)}
+                      {getFeedingLabel(option)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -156,8 +179,8 @@ export default function ChildProfileSetup() {
           </Card>
 
           {/* Allergies */}
-          <Card className="p-6 space-y-4">
-            <Label className="text-sm font-medium">Known Allergies</Label>
+          <Card className="p-5 space-y-4 shadow-sm">
+            <Label className="text-sm font-semibold">{t('knownAllergies')}</Label>
             <div className="grid grid-cols-2 gap-3">
               {ALLERGEN_LIST.map((allergen) => (
                 <div key={allergen} className="flex items-center space-x-2">
@@ -167,7 +190,7 @@ export default function ChildProfileSetup() {
                     onCheckedChange={() => handleAllergyToggle(allergen)}
                   />
                   <Label htmlFor={allergen} className="text-sm cursor-pointer font-normal">
-                    {allergen.charAt(0).toUpperCase() + allergen.slice(1).replace('_', ' ')}
+                    {getAllergenLabel(allergen)}
                   </Label>
                 </div>
               ))}
@@ -175,30 +198,28 @@ export default function ChildProfileSetup() {
           </Card>
 
           {/* Emergency Contact */}
-          <Card className="p-6 space-y-4">
-            <Label className="text-sm font-medium">Emergency Contact</Label>
-            <div className="space-y-2">
-              <Input
-                placeholder="Contact name"
-                value={formData.emergencyContactName}
-                onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
-              />
-              <Input
-                placeholder="Contact phone"
-                type="tel"
-                value={formData.emergencyContactPhone}
-                onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)}
-              />
-            </div>
+          <Card className="p-5 space-y-3 shadow-sm">
+            <Label className="text-sm font-semibold">{t('emergencyContact')}</Label>
+            <Input
+              placeholder={t('contactName')}
+              value={formData.emergencyContactName}
+              onChange={(e) => handleInputChange('emergencyContactName', e.target.value)}
+            />
+            <Input
+              placeholder={t('contactPhone')}
+              type="tel"
+              value={formData.emergencyContactPhone}
+              onChange={(e) => handleInputChange('emergencyContactPhone', e.target.value)}
+            />
           </Card>
 
           {/* Submit Button */}
           <Button
             type="submit"
             disabled={!formData.name || !formData.birthDate || !formData.gender || isLoading}
-            className="w-full h-12 text-base font-medium gap-2"
+            className="w-full h-12 text-base font-semibold gap-2 rounded-xl"
           >
-            {isLoading ? 'Creating Profile...' : 'Create Profile'}
+            {isLoading ? t('saving') : t('saveProfile')}
             {!isLoading && <ArrowRight size={18} />}
           </Button>
         </form>

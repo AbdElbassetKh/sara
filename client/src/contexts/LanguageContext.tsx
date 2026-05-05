@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { SUPPORTED_LANGUAGES, Language } from '@/const';
+import { useTranslations, TranslationKey } from '@/lib/translations';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   dir: 'ltr' | 'rtl';
+  t: (key: TranslationKey) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   });
 
   const dir = language === 'ar' ? 'rtl' : 'ltr';
+  const { t } = useTranslations(language);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
@@ -33,7 +36,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, [language, dir]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, dir }}>
+    <LanguageContext.Provider value={{ language, setLanguage, dir, t }}>
       {children}
     </LanguageContext.Provider>
   );

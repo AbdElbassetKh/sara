@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const VACCINES = [
   { name: 'BCG', date: '2024-01-15', status: 'completed', nextDue: null },
@@ -16,40 +17,43 @@ const VACCINES = [
 ];
 
 export default function Vaccines() {
+  const { t, language } = useLanguage();
   const completedCount = VACCINES.filter((v) => v.status === 'completed').length;
   const pendingCount = VACCINES.filter((v) => v.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-24">
-      <div className="max-w-md mx-auto space-y-6">
+    <div className="min-h-screen bg-background pb-24">
+      <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header */}
-        <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">Vaccination Schedule</h1>
-          <p className="text-muted">Track your child's vaccinations</p>
+        <div className="pt-2">
+          <h1 className="text-2xl font-bold text-foreground">{t('vaccineJournal')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {language === 'fr' ? "Suivez les vaccinations de votre enfant" : language === 'ar' ? 'تابع تطعيمات طفلك' : "Track your child's vaccinations"}
+          </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          <Card className="p-4 text-center space-y-2">
+          <Card className="p-4 text-center space-y-1 shadow-sm">
             <div className="text-2xl font-bold text-green-600">{completedCount}</div>
-            <p className="text-xs text-muted">Completed</p>
+            <p className="text-xs text-muted-foreground">{t('administered')}</p>
           </Card>
-          <Card className="p-4 text-center space-y-2">
+          <Card className="p-4 text-center space-y-1 shadow-sm">
             <div className="text-2xl font-bold text-orange-600">{pendingCount}</div>
-            <p className="text-xs text-muted">Pending</p>
+            <p className="text-xs text-muted-foreground">{t('upcoming')}</p>
           </Card>
         </div>
 
         {/* Completed Vaccines */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">Completed</h2>
+          <h2 className="text-base font-semibold text-foreground">{t('administered')}</h2>
           <div className="space-y-2">
             {VACCINES.filter((v) => v.status === 'completed').map((vaccine) => (
-              <Card key={vaccine.name} className="p-4 flex items-start gap-3">
-                <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-1" />
+              <Card key={vaccine.name} className="p-4 flex items-start gap-3 shadow-sm">
+                <CheckCircle size={18} className="text-green-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground">{vaccine.name}</p>
-                  <p className="text-sm text-muted">{vaccine.date}</p>
+                  <p className="font-semibold text-foreground text-sm">{vaccine.name}</p>
+                  <p className="text-xs text-muted-foreground">{vaccine.date}</p>
                 </div>
               </Card>
             ))}
@@ -58,14 +62,17 @@ export default function Vaccines() {
 
         {/* Pending Vaccines */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-foreground">Upcoming</h2>
+          <h2 className="text-base font-semibold text-foreground">{t('upcoming')}</h2>
           <div className="space-y-2">
             {VACCINES.filter((v) => v.status === 'pending').map((vaccine) => (
-              <Card key={vaccine.name} className="p-4 flex items-start gap-3 border-orange-200 bg-orange-50/50">
-                <Clock size={20} className="text-orange-600 flex-shrink-0 mt-1" />
+              <Card key={vaccine.name} className="p-4 flex items-start gap-3 border-orange-200 bg-orange-50/50 shadow-sm">
+                <Clock size={18} className="text-orange-600 flex-shrink-0 mt-0.5" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground">{vaccine.name}</p>
-                  <p className="text-sm text-muted">Due: {vaccine.nextDue}</p>
+                  <p className="font-semibold text-foreground text-sm">{vaccine.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {language === 'fr' ? 'Prévu le : ' : language === 'ar' ? 'موعده: ' : 'Due: '}
+                    {vaccine.nextDue}
+                  </p>
                 </div>
               </Card>
             ))}
@@ -73,21 +80,27 @@ export default function Vaccines() {
         </div>
 
         {/* Important Note */}
-        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded space-y-2">
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg">
           <div className="flex items-start gap-2">
-            <AlertCircle size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
+            <AlertCircle size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-blue-900">Keep Updated</p>
+              <p className="text-sm font-semibold text-blue-900">
+                {language === 'fr' ? 'Restez à jour' : language === 'ar' ? 'ابقَ على اطلاع' : 'Keep Updated'}
+              </p>
               <p className="text-xs text-blue-800 mt-1">
-                Vaccinations are crucial for your child's health. Follow the recommended schedule and consult with your pediatrician.
+                {language === 'fr'
+                  ? "Les vaccinations sont cruciales pour la santé de votre enfant. Suivez le calendrier recommandé."
+                  : language === 'ar'
+                  ? 'التطعيمات ضرورية لصحة طفلك. اتبع الجدول الموصى به واستشر طبيب الأطفال.'
+                  : "Vaccinations are crucial for your child's health. Follow the recommended schedule and consult with your pediatrician."}
               </p>
             </div>
           </div>
         </div>
 
         {/* Action Button */}
-        <Button className="w-full h-12 text-base font-medium">
-          Schedule Appointment
+        <Button className="w-full h-12 text-base font-semibold rounded-xl">
+          {language === 'fr' ? 'Prendre un rendez-vous' : language === 'ar' ? 'حجز موعد' : 'Schedule Appointment'}
         </Button>
       </div>
     </div>
