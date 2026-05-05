@@ -125,3 +125,12 @@
 - [x] Afficher le disclaimer dans Insights.tsx (avant les recommandations IA)
 - [x] Afficher le disclaimer dans EmergencyPage.tsx
 - [x] Afficher le disclaimer dans Advice.tsx
+
+## Phase 20 : Photo de profil de l'enfant dans les Paramètres
+- [x] Vérifier que la colonne `photoUrl` existe dans la table `children`
+- [x] Ajouter la procédure tRPC `children.uploadPhoto` (upload S3 + mise à jour DB)
+- [x] Procédure `children.list` existante utilisée directement
+- [x] Créer le composant `ChildPhotoEditor` (avatar + bouton upload + preview)
+- [x] Intégrer `ChildPhotoEditor` dans Settings.tsx (section "Profils enfants")
+- [x] 0 erreur TypeScript après modifications
+- [x] 15 tests passants

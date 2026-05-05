@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getChildrenByUserId, createChild, getChildById, updateChild } from "../db";
+import { storagePut } from "../storage";
 
 export const childrenRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -55,5 +56,34 @@ export const childrenRouter = router({
     )
     .mutation(async ({ input }) => {
       return updateChild(input.childId, input.data);
+    }),
+
+  // Upload a child's profile photo (base64 encoded) and update the DB
+  uploadPhoto: protectedProcedure
+    .input(
+      z.object({
+        childId: z.number(),
+        // base64-encoded image data (without the data:image/...;base64, prefix)
+        base64Data: z.string(),
+        mimeType: z.string().default("image/jpeg"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify the child belongs to the current user
+      const child = await getChildById(input.childId);
+      if (!child || child.userId !== ctx.user.id) {
+        throw new Error("Child not found or access denied");
+      }
+
+      // Decode base64 and upload to S3
+      const buffer = Buffer.from(input.base64Data, "base64");
+      const ext = input.mimeType.split("/")[1] || "jpg";
+      const key = `children/${ctx.user.id}/child-${input.childId}-photo.${ext}`;
+      const { url } = await storagePut(key, buffer, input.mimeType);
+
+      // Update the child record with the new photo URL
+      await updateChild(input.childId, { photoUrl: url });
+
+      return { photoUrl: url };
     }),
 });

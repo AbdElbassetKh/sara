@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@/const';
-import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, Users, ChevronRight } from 'lucide-react';
+import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, Users, ChevronRight, Baby } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useLocation } from 'wouter';
+import { ChildPhotoEditor } from '@/components/ChildPhotoEditor';
 
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
@@ -46,6 +47,9 @@ export default function Settings() {
         <div>
           <h2 className="text-2xl font-bold text-foreground">{t('settings')}</h2>
         </div>
+
+        {/* Children Profiles – Photo */}
+        <ChildrenProfileSection language={language} />
 
         {/* Language Settings */}
         <Card className="p-5 space-y-4 shadow-sm">
@@ -242,5 +246,86 @@ export default function Settings() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Sub-component: Children profile photo section ───────────────────────────
+function ChildrenProfileSection({ language }: { language: string }) {
+  const t = (fr: string, ar: string, en: string) =>
+    language === 'fr' ? fr : language === 'ar' ? ar : en;
+
+  const { data: children, isLoading } = trpc.children.list.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  if (isLoading) {
+    return (
+      <Card className="p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <Baby size={18} className="text-pink-500" />
+          <h3 className="text-base font-semibold text-foreground">
+            {t('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}
+          </h3>
+        </div>
+        <div className="space-y-3">
+          {[1, 2].map((i) => (
+            <div key={i} className="flex items-center gap-4 animate-pulse">
+              <div className="w-16 h-16 rounded-2xl bg-muted flex-shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-muted rounded w-1/2" />
+                <div className="h-3 bg-muted rounded w-1/3" />
+                <div className="h-7 bg-muted rounded w-28" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+
+  if (!children || children.length === 0) {
+    return (
+      <Card className="p-5 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Baby size={18} className="text-pink-500" />
+          <h3 className="text-base font-semibold text-foreground">
+            {t('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}
+          </h3>
+        </div>
+        <p className="text-sm text-muted-foreground text-center py-4">
+          {t(
+            'Aucun profil enfant créé. Ajoutez un enfant depuis le tableau de bord.',
+            'لا يوجد ملف طفل. أضف طفلاً من لوحة التحكم.',
+            'No child profile yet. Add a child from the dashboard.',
+          )}
+        </p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-5 shadow-sm space-y-4">
+      <div className="flex items-center gap-2">
+        <Baby size={18} className="text-pink-500" />
+        <h3 className="text-base font-semibold text-foreground">
+          {t('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}
+        </h3>
+      </div>
+      <p className="text-xs text-muted-foreground -mt-2">
+        {t(
+          'Appuyez sur la caméra ou le bouton pour changer la photo de profil.',
+          'اضغط على الكاميرا أو الزر لتغيير صورة الملف الشخصي.',
+          'Tap the camera icon or button to change the profile photo.',
+        )}
+      </p>
+      <div className="divide-y divide-border">
+        {children.map((child, idx) => (
+          <div key={child.id} className={idx > 0 ? 'pt-4' : ''}>
+            <ChildPhotoEditor child={child} />
+          </div>
+        ))}
+      </div>
+    </Card>
   );
 }
