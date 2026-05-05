@@ -30,10 +30,13 @@ export const childrenRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      return createChild({
+      await createChild({
         userId: ctx.user.id,
         ...input,
       });
+      // Fetch the newly created child to return full data with ID
+      const allChildren = await getChildrenByUserId(ctx.user.id);
+      return allChildren[allChildren.length - 1];
     }),
 
   update: protectedProcedure

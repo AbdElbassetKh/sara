@@ -1,5 +1,7 @@
-const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { useState } from 'react';
+import { trpc } from '@/lib/trpc';
+import { useAppContext } from '@/contexts/AppContext';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -28,6 +30,30 @@ export default function ChildProfileSetup() {
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { setSelectedChild } = useAppContext();
+
+  const createChild = trpc.children.create.useMutation({
+    onSuccess: (newChild) => {
+      setSelectedChild({
+        id: newChild.id,
+        name: newChild.name,
+        birthDate: newChild.birthDate ? new Date(newChild.birthDate).toISOString().split('T')[0] : '',
+        gender: (newChild.gender as 'boy' | 'girl') ?? 'boy',
+        allergies: Array.isArray(newChild.allergies) ? newChild.allergies : [],
+        photoUrl: newChild.photoUrl ?? undefined,
+      });
+      toast.success(isAr ? 'تم الحفظ بنجاح! ✅' : isFr ? 'Profil enregistré ! ✅' : 'Profile saved! ✅', {
+        description: isAr ? `تم إنشاء ملف ${newChild.name}` : isFr ? `Profil de ${newChild.name} créé` : `${newChild.name}'s profile created`,
+      });
+      setLocation('/');
+    },
+    onError: (err) => {
+      toast.error(isAr ? 'خطأ في الحفظ' : isFr ? 'Erreur d\'enregistrement' : 'Save error', {
+        description: err.message,
+      });
+      setIsLoading(false);
+    },
+  });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -55,9 +81,19 @@ export default function ChildProfileSetup() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.name || !formData.birthDate || !formData.gender) return;
     setIsLoading(true);
-    console.log('Form data:', formData);
-    setIsLoading(false);
+    createChild.mutate({
+      name: formData.name,
+      birthDate: formData.birthDate,
+      gender: formData.gender as 'boy' | 'girl',
+      feedingType: formData.feedingType as 'breast' | 'formula' | 'mixed' | 'solids' | undefined || undefined,
+      allergies: formData.allergies,
+      emergencyContact: formData.emergencyContactName
+        ? { name: formData.emergencyContactName, phone: formData.emergencyContactPhone }
+        : undefined,
+      photoUrl: photoPreview ?? undefined,
+    });
   };
 
   const getGenderLabel = (option: string) => {
