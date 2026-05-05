@@ -4,12 +4,14 @@ import { trpc } from '@/lib/trpc';
 import { useAppContext } from '@/contexts/AppContext';
 import { useLocation } from 'wouter';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  AreaChart, Area,
+  BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
 import {
   Sparkles, TrendingUp, AlertTriangle, CheckCircle, Loader2,
-  Syringe, ChevronLeft, ChevronRight, Brain, Link2, ShieldAlert,
-  ChevronDown, ChevronUp
+  ChevronLeft, ChevronRight, Brain, Link2, ShieldAlert,
+  ChevronDown, ChevronUp, BarChart2, Activity, Grid3X3
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,22 +25,45 @@ const C = {
   purple:    '#8E24AA',
 };
 
-// ── Risk badge helper ─────────────────────────────────────────────────────────
+// ── Period selector ───────────────────────────────────────────────────────────
+type Period = 7 | 14 | 30;
+
+function PeriodSelector({ value, onChange, isAr, isFr }: { value: Period; onChange: (v: Period) => void; isAr: boolean; isFr: boolean }) {
+  const options: { v: Period; label: string }[] = [
+    { v: 7,  label: isAr ? '7 أيام'  : isFr ? '7 j'   : '7d'  },
+    { v: 14, label: isAr ? '14 يوم'  : isFr ? '14 j'  : '14d' },
+    { v: 30, label: isAr ? '30 يوم'  : isFr ? '30 j'  : '30d' },
+  ];
+  return (
+    <div className="flex gap-1 p-1 rounded-2xl" style={{ background: '#F1F5F9' }}>
+      {options.map(o => (
+        <button
+          key={o.v}
+          onClick={() => onChange(o.v)}
+          className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+          style={value === o.v
+            ? { background: 'white', color: C.purple, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }
+            : { color: '#9CA3AF' }}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ── Risk badge ────────────────────────────────────────────────────────────────
 function RiskBadge({ level, isAr, isFr }: { level: 'low' | 'medium' | 'high'; isAr: boolean; isFr: boolean }) {
   const cfg = {
-    high:   { bg: '#FFEBEE', border: '#FFCDD2', color: C.danger,  label: isAr ? 'عالٍ'    : isFr ? 'Élevé'  : 'High'   },
-    medium: { bg: '#FFF8E1', border: '#FFE082', color: C.warning, label: isAr ? 'متوسط'   : isFr ? 'Moyen'  : 'Medium' },
-    low:    { bg: '#E8F5E9', border: '#C8E6C9', color: C.success, label: isAr ? 'منخفض'   : isFr ? 'Faible' : 'Low'    },
+    high:   { bg: '#FFEBEE', border: '#FFCDD2', color: C.danger,  label: isAr ? 'عالٍ'  : isFr ? 'Élevé'  : 'High'   },
+    medium: { bg: '#FFF8E1', border: '#FFE082', color: C.warning, label: isAr ? 'متوسط' : isFr ? 'Moyen'  : 'Medium' },
+    low:    { bg: '#E8F5E9', border: '#C8E6C9', color: C.success, label: isAr ? 'منخفض' : isFr ? 'Faible' : 'Low'    },
   }[level];
-
   return (
-    <div
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold"
-      style={{ background: cfg.bg, border: `1.5px solid ${cfg.border}`, color: cfg.color }}
-    >
+    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-extrabold"
+      style={{ background: cfg.bg, border: `1.5px solid ${cfg.border}`, color: cfg.color }}>
       <ShieldAlert size={12} />
-      {isAr ? 'مستوى الخطر: ' : isFr ? 'Risque : ' : 'Risk: '}
-      {cfg.label}
+      {isAr ? 'مستوى الخطر: ' : isFr ? 'Risque : ' : 'Risk: '}{cfg.label}
     </div>
   );
 }
@@ -56,6 +81,35 @@ function ConfidenceBar({ value }: { value: number }) {
   );
 }
 
+// ── Heatmap cell colour ───────────────────────────────────────────────────────
+function heatColor(count: number, max: number): string {
+  if (max === 0 || count === 0) return '#F1F5F9';
+  const ratio = count / max;
+  if (ratio >= 0.75) return '#EF5350';
+  if (ratio >= 0.5)  return '#FFA726';
+  if (ratio >= 0.25) return '#FFD54F';
+  return '#E8F5E9';
+}
+
+// ── Custom tooltip for AreaChart ──────────────────────────────────────────────
+function CustomAreaTooltip({ active, payload, label, isAr, isFr }: {
+  active?: boolean; payload?: { value: number; name: string; color: string }[]; label?: string; isAr: boolean; isFr: boolean;
+}) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="px-3 py-2 rounded-2xl text-xs" style={{ background: 'white', boxShadow: '0 4px 16px rgba(0,0,0,0.12)', border: '1px solid #F1F5F9' }}>
+      <p className="font-bold text-gray-700 mb-1">{label}</p>
+      {payload.map((p, i) => (
+        <p key={i} style={{ color: p.color }}>
+          {p.name === 'symptoms' ? (isAr ? 'أعراض' : isFr ? 'Symptômes' : 'Symptoms') :
+           p.name === 'avgSeverity' ? (isAr ? 'شدة متوسطة' : isFr ? 'Sévérité moy.' : 'Avg severity') :
+           (isAr ? 'وجبات' : isFr ? 'Repas' : 'Meals')} : <strong>{p.value}</strong>
+        </p>
+      ))}
+    </div>
+  );
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Insights() {
   const { language } = useLanguage();
@@ -67,52 +121,71 @@ export default function Insights() {
   const isFr = language === 'fr';
   const t = (fr: string, ar: string, en: string) => isAr ? ar : isFr ? fr : en;
 
+  const [period, setPeriod] = useState<Period>(30);
   const [showAdvice, setShowAdvice] = useState(false);
+  const [activeChart, setActiveChart] = useState<'timeline' | 'frequency' | 'heatmap'>('timeline');
 
-  // ── Queries ─────────────────────────────────────────────────────────────────
-  const { data: meals = [] } = trpc.meals.list.useQuery(
-    { childId },
-    { enabled: childId > 0 }
+  // ── Base queries ─────────────────────────────────────────────────────────────
+  const { data: meals = [] }    = trpc.meals.list.useQuery({ childId }, { enabled: childId > 0 });
+  const { data: symptoms = [] } = trpc.symptoms.list.useQuery({ childId }, { enabled: childId > 0 });
+  const { data: correlations = [] } = trpc.insights.detectCorrelations.useQuery({ childId }, { enabled: childId > 0, retry: false });
+
+  // ── Chart queries ─────────────────────────────────────────────────────────────
+  const { data: timeSeries = [], isLoading: tsLoading, isError: tsError, refetch: tsRefetch } = trpc.insights.getSymptomTimeSeries.useQuery(
+    { childId, days: period },
+    { enabled: childId > 0, retry: false }
   );
-  const { data: symptoms = [] } = trpc.symptoms.list.useQuery(
-    { childId },
-    { enabled: childId > 0 }
+  const { data: frequency = [], isLoading: freqLoading, isError: freqError, refetch: freqRefetch } = trpc.insights.getSymptomFrequency.useQuery(
+    { childId, days: period },
+    { enabled: childId > 0, retry: false }
   );
-  const { data: correlations = [], isLoading: corrLoading } = trpc.insights.detectCorrelations.useQuery(
-    { childId },
+  const { data: heatmap, isLoading: heatLoading, isError: heatError, refetch: heatRefetch } = trpc.insights.getMealSymptomHeatmap.useQuery(
+    { childId, days: period },
     { enabled: childId > 0, retry: false }
   );
 
-  // ── AI mutation ─────────────────────────────────────────────────────────────
+  // ── AI mutation ───────────────────────────────────────────────────────────────
   const aiMutation = trpc.insights.analyzeWithAI.useMutation({
-    onError: (err) => toast.error(err.message || t("Erreur IA", 'خطأ في الذكاء الاصطناعي', 'AI error')),
+    onError: (err) => toast.error(err.message || t('Erreur IA', 'خطأ في الذكاء الاصطناعي', 'AI error')),
   });
   const aiResult = aiMutation.data;
 
-  // ── Chart data (last 7 days) ─────────────────────────────────────────────
-  const chartData = useMemo(() => {
-    const days = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const dateStr = d.toISOString().split('T')[0];
-      const label = d.toLocaleDateString(isAr ? 'ar-DZ' : isFr ? 'fr-FR' : 'en-US', { weekday: 'short' });
-      days.push({
-        date: dateStr,
-        label,
-        meals:    meals.filter(m => new Date(m.eatenAt).toISOString().split('T')[0] === dateStr).length,
-        symptoms: symptoms.filter(s => new Date(s.occurredAt).toISOString().split('T')[0] === dateStr).length,
-      });
-    }
-    return days;
-  }, [meals, symptoms, language]);
-
-  // ── Stat cards ───────────────────────────────────────────────────────────────
+  // ── Stat cards ────────────────────────────────────────────────────────────────
   const STAT_CARDS = [
-    { value: meals.length,    label: t('Repas enregistrés', 'وجبات مسجلة', 'Meals logged'),       gradient: `linear-gradient(135deg, ${C.primary}, #0288D1)`,  shadow: 'rgba(79,195,247,0.4)',  emoji: '🍽️' },
-    { value: symptoms.length, label: t('Symptômes signalés', 'أعراض مبلغ عنها', 'Symptoms'),      gradient: `linear-gradient(135deg, ${C.secondary}, #E91E8C)`, shadow: 'rgba(244,143,177,0.4)', emoji: '🔔' },
-    { value: correlations.length, label: t('Corrélations détectées', 'ارتباطات مكتشفة', 'Correlations'), gradient: `linear-gradient(135deg, #FFD54F, #FF8F00)`, shadow: 'rgba(255,213,79,0.4)', emoji: '🔗' },
-    { value: meals.filter(m => m.aiAnalysis?.riskLevel === 'high').length, label: t('Repas à risque élevé', 'وجبات عالية الخطر', 'High-risk meals'), gradient: `linear-gradient(135deg, #EF9A9A, ${C.danger})`, shadow: 'rgba(239,83,80,0.4)', emoji: '⚠️' },
+    { value: meals.length,        label: t('Repas enregistrés', 'وجبات مسجلة', 'Meals logged'),           gradient: `linear-gradient(135deg, ${C.primary}, #0288D1)`,  shadow: 'rgba(79,195,247,0.4)',  emoji: '🍽️' },
+    { value: symptoms.length,     label: t('Symptômes signalés', 'أعراض مبلغ عنها', 'Symptoms'),          gradient: `linear-gradient(135deg, ${C.secondary}, #E91E8C)`, shadow: 'rgba(244,143,177,0.4)', emoji: '🔔' },
+    { value: correlations.length, label: t('Corrélations détectées', 'ارتباطات مكتشفة', 'Correlations'),  gradient: 'linear-gradient(135deg, #FFD54F, #FF8F00)',          shadow: 'rgba(255,213,79,0.4)', emoji: '🔗' },
+    {
+      value: symptoms.length > 0
+        ? (Math.round(symptoms.reduce((acc, s) => acc + s.severity, 0) / symptoms.length * 10) / 10)
+        : 0,
+      label: t('Sévérité moyenne', 'متوسط الشدة', 'Avg severity'),
+      gradient: `linear-gradient(135deg, #EF9A9A, ${C.danger})`,
+      shadow: 'rgba(239,83,80,0.4)',
+      emoji: '📊',
+    },
+  ];
+
+  // ── Formatted time series labels ──────────────────────────────────────────────
+  const formattedTimeSeries = useMemo(() => {
+    const locale = isAr ? 'ar-DZ' : isFr ? 'fr-FR' : 'en-US';
+    return timeSeries.map(d => ({
+      ...d,
+      label: new Date(d.date + 'T12:00:00Z').toLocaleDateString(locale, { day: 'numeric', month: 'short' }),
+    }));
+  }, [timeSeries, language]);
+
+  // ── Heatmap max value ─────────────────────────────────────────────────────────
+  const heatMax = useMemo(() => {
+    if (!heatmap) return 0;
+    return Math.max(...heatmap.matrix.flatMap(row => row.values.map(v => v.count)));
+  }, [heatmap]);
+
+  // ── Chart tab config ──────────────────────────────────────────────────────────
+  const chartTabs = [
+    { key: 'timeline'  as const, icon: Activity,  label: t('Évolution', 'التطور', 'Timeline') },
+    { key: 'frequency' as const, icon: BarChart2,  label: t('Fréquence', 'التكرار', 'Frequency') },
+    { key: 'heatmap'   as const, icon: Grid3X3,    label: t('Heatmap',   'خريطة',   'Heatmap') },
   ];
 
   return (
@@ -138,7 +211,6 @@ export default function Insights() {
             <button onClick={() => setLocation('/')} className="w-9 h-9 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
               {isAr ? <ChevronRight size={20} color="white" /> : <ChevronLeft size={20} color="white" />}
             </button>
-            {/* ── AI Analyze button ── */}
             <button
               onClick={() => {
                 if (!childId) { toast.error(t("Sélectionnez un enfant d'abord", 'اختر طفلاً أولاً', 'Select a child first')); return; }
@@ -157,7 +229,7 @@ export default function Insights() {
             </div>
             <div>
               <h1 className="text-white text-xl font-extrabold leading-tight">{t('Insights IA', 'رؤى الذكاء الاصطناعي', 'AI Insights')}</h1>
-              <p className="text-white/75 text-xs mt-0.5">{t('Analyse des 30 derniers jours', 'تحليل آخر 30 يوماً', 'Last 30 days analysis')}</p>
+              <p className="text-white/75 text-xs mt-0.5">{t('Analyse des données de santé', 'تحليل بيانات الصحة', 'Health data analysis')}</p>
             </div>
           </div>
         </div>
@@ -178,7 +250,234 @@ export default function Insights() {
           ))}
         </div>
 
-        {/* ── Correlations section ── */}
+        {/* ══════════════════════════════════════════════════════════════════════
+            CHARTS SECTION
+        ══════════════════════════════════════════════════════════════════════ */}
+        <div className="p-5 rounded-3xl bg-white space-y-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}>
+
+          {/* Chart header: tabs + period selector */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex gap-1">
+              {chartTabs.map(tab => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveChart(tab.key)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                    style={activeChart === tab.key
+                      ? { background: `linear-gradient(135deg, #CE93D8, ${C.purple})`, color: 'white', boxShadow: '0 3px 10px rgba(142,36,170,0.3)' }
+                      : { color: '#9CA3AF' }}
+                  >
+                    <Icon size={12} />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+            <PeriodSelector value={period} onChange={setPeriod} isAr={isAr} isFr={isFr} />
+          </div>
+
+          {/* ── 1. Timeline (AreaChart) ── */}
+          {activeChart === 'timeline' && (
+            <>
+              <p className="text-xs font-extrabold text-gray-700">
+                📈 {t(`Évolution des symptômes — ${period} derniers jours`, `تطور الأعراض — آخر ${period} يوماً`, `Symptom evolution — last ${period} days`)}
+              </p>
+              {tsError ? (
+                <div className="flex flex-col items-center py-6 gap-2">
+                  <p className="text-xs text-red-500 font-semibold">{t('Erreur de chargement', 'خطأ في التحميل', 'Loading error')}</p>
+                  <button onClick={() => tsRefetch()} className="px-3 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #CE93D8, #8E24AA)' }}>{t('Réessayer', 'إعادة المحاولة', 'Retry')}</button>
+                </div>
+              ) : tsLoading ? (
+                <div className="flex items-center justify-center py-8 gap-2">
+                  <Loader2 size={18} className="animate-spin" style={{ color: C.purple }} />
+                  <span className="text-xs text-gray-400">{t('Chargement…', 'جارٍ التحميل…', 'Loading…')}</span>
+                </div>
+              ) : timeSeries.every(d => d.symptoms === 0 && d.meals === 0) ? (
+                <div className="flex flex-col items-center py-8 gap-2 text-gray-400">
+                  <TrendingUp size={28} className="opacity-40" />
+                  <p className="text-xs text-center">{t('Aucune donnée pour cette période', 'لا توجد بيانات لهذه الفترة', 'No data for this period')}</p>
+                </div>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <AreaChart data={formattedTimeSeries} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="gradSymptoms" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor={C.secondary} stopOpacity={0.6} />
+                          <stop offset="95%" stopColor={C.secondary} stopOpacity={0.05} />
+                        </linearGradient>
+                        <linearGradient id="gradSeverity" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor={C.danger} stopOpacity={0.5} />
+                          <stop offset="95%" stopColor={C.danger} stopOpacity={0.05} />
+                        </linearGradient>
+                        <linearGradient id="gradMeals" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%"  stopColor={C.primary} stopOpacity={0.4} />
+                          <stop offset="95%" stopColor={C.primary} stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+                      <XAxis dataKey="label" tick={{ fontSize: 9, fill: '#9CA3AF' }} interval={period === 7 ? 0 : period === 14 ? 1 : 4} />
+                      <YAxis tick={{ fontSize: 9, fill: '#9CA3AF' }} allowDecimals={false} />
+                      <Tooltip content={<CustomAreaTooltip isAr={isAr} isFr={isFr} />} />
+                      <Area type="monotone" dataKey="meals"       stroke={C.primary}   strokeWidth={2} fill="url(#gradMeals)"    dot={false} name="meals" />
+                      <Area type="monotone" dataKey="symptoms"    stroke={C.secondary} strokeWidth={2} fill="url(#gradSymptoms)" dot={false} name="symptoms" />
+                      <Area type="monotone" dataKey="avgSeverity" stroke={C.danger}    strokeWidth={1.5} fill="url(#gradSeverity)" dot={false} strokeDasharray="4 2" name="avgSeverity" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                  <div className="flex items-center gap-4 justify-center flex-wrap">
+                    {[
+                      { color: C.primary,   label: t('Repas', 'وجبات', 'Meals') },
+                      { color: C.secondary, label: t('Symptômes', 'أعراض', 'Symptoms') },
+                      { color: C.danger,    label: t('Sévérité moy.', 'متوسط الشدة', 'Avg severity'), dashed: true },
+                    ].map((l, i) => (
+                      <div key={i} className="flex items-center gap-1">
+                        <div className="w-6 h-0.5 rounded" style={{ background: l.color, borderTop: l.dashed ? `2px dashed ${l.color}` : undefined }} />
+                        <span className="text-[10px] text-gray-500">{l.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </>
+          )}
+
+          {/* ── 2. Frequency (BarChart) ── */}
+          {activeChart === 'frequency' && (
+            <>
+              <p className="text-xs font-extrabold text-gray-700">
+                📊 {t(`Fréquence par type de symptôme — ${period}j`, `تكرار الأعراض حسب النوع — ${period} يوماً`, `Symptom frequency by type — ${period}d`)}
+              </p>
+              {freqError ? (
+                <div className="flex flex-col items-center py-6 gap-2">
+                  <p className="text-xs text-red-500 font-semibold">{t('Erreur de chargement', 'خطأ في التحميل', 'Loading error')}</p>
+                  <button onClick={() => freqRefetch()} className="px-3 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #CE93D8, #8E24AA)' }}>{t('Réessayer', 'إعادة المحاولة', 'Retry')}</button>
+                </div>
+              ) : freqLoading ? (
+                <div className="flex items-center justify-center py-8 gap-2">
+                  <Loader2 size={18} className="animate-spin" style={{ color: C.purple }} />
+                </div>
+              ) : frequency.length === 0 ? (
+                <div className="flex flex-col items-center py-8 gap-2 text-gray-400">
+                  <BarChart2 size={28} className="opacity-40" />
+                  <p className="text-xs text-center">{t('Aucun symptôme enregistré', 'لا توجد أعراض مسجلة', 'No symptoms recorded')}</p>
+                </div>
+              ) : (
+                <>
+                  <ResponsiveContainer width="100%" height={Math.max(160, frequency.length * 36)}>
+                    <BarChart data={frequency} layout="vertical" margin={{ top: 5, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" horizontal={false} />
+                      <XAxis type="number" tick={{ fontSize: 9, fill: '#9CA3AF' }} allowDecimals={false} />
+                      <YAxis type="category" dataKey="type" tick={{ fontSize: 9, fill: '#6B7280' }} width={80} />
+                      <Tooltip
+                        contentStyle={{ fontSize: 11, borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}
+                        formatter={(value: number, name: string) => [
+                          value,
+                          name === 'count'
+                            ? t('Occurrences', 'مرات', 'Occurrences')
+                            : t('Sévérité moy.', 'متوسط الشدة', 'Avg severity'),
+                        ]}
+                      />
+                      <Bar dataKey="count"       name="count"       fill={C.secondary} radius={[0, 6, 6, 0]} />
+                      <Bar dataKey="avgSeverity" name="avgSeverity" fill={C.danger}    radius={[0, 6, 6, 0]} opacity={0.7} />
+                      <Legend
+                        formatter={(v) => v === 'count'
+                          ? t('Occurrences', 'مرات', 'Occurrences')
+                          : t('Sévérité moy.', 'متوسط الشدة', 'Avg severity')}
+                        wrapperStyle={{ fontSize: 10 }}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </>
+              )}
+            </>
+          )}
+
+          {/* ── 3. Heatmap ── */}
+          {activeChart === 'heatmap' && (
+            <>
+              <p className="text-xs font-extrabold text-gray-700">
+                🗺️ {t(`Aliment × Symptôme — ${period}j`, `الطعام × الأعراض — ${period} يوماً`, `Food × Symptom — ${period}d`)}
+              </p>
+              <p className="text-[10px] text-gray-400">
+                {t('Intensité des co-occurrences dans les 4h suivant un repas', 'شدة التزامن خلال 4 ساعات بعد الوجبة', 'Co-occurrence intensity within 4h after a meal')}
+              </p>
+              {heatError ? (
+                <div className="flex flex-col items-center py-6 gap-2">
+                  <p className="text-xs text-red-500 font-semibold">{t('Erreur de chargement', 'خطأ في التحميل', 'Loading error')}</p>
+                  <button onClick={() => heatRefetch()} className="px-3 py-1.5 rounded-full text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #CE93D8, #8E24AA)' }}>{t('Réessayer', 'إعادة المحاولة', 'Retry')}</button>
+                </div>
+              ) : heatLoading ? (
+                <div className="flex items-center justify-center py-8 gap-2">
+                  <Loader2 size={18} className="animate-spin" style={{ color: C.purple }} />
+                </div>
+              ) : !heatmap || heatmap.foods.length === 0 ? (
+                <div className="flex flex-col items-center py-8 gap-2 text-gray-400">
+                  <Grid3X3 size={28} className="opacity-40" />
+                  <p className="text-xs text-center">{t('Pas assez de données pour la heatmap', 'بيانات غير كافية للخريطة', 'Not enough data for heatmap')}</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[9px]" style={{ borderCollapse: 'separate', borderSpacing: 2 }}>
+                    <thead>
+                      <tr>
+                        <th className="text-left text-gray-400 font-semibold pb-1 pr-2" style={{ minWidth: 60 }}>
+                          {t('Aliment ↓ / Symptôme →', 'طعام ↓ / عرض →', 'Food ↓ / Symptom →')}
+                        </th>
+                        {heatmap.symptoms.map((s, i) => (
+                          <th key={i} className="text-center font-semibold text-gray-600 pb-1 px-1" style={{ minWidth: 44 }}>
+                            {s.length > 8 ? s.slice(0, 7) + '…' : s}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {heatmap.matrix.map((row, ri) => (
+                        <tr key={ri}>
+                          <td className="text-gray-600 font-semibold pr-2 py-0.5" style={{ maxWidth: 60 }}>
+                            {row.food.length > 9 ? row.food.slice(0, 8) + '…' : row.food}
+                          </td>
+                          {row.values.map((cell, ci) => (
+                            <td key={ci} className="text-center py-0.5 px-0.5">
+                              <div
+                                className="w-full rounded-lg flex items-center justify-center font-bold"
+                                style={{
+                                  background: heatColor(cell.count, heatMax),
+                                  height: 28,
+                                  color: cell.count > 0 ? '#374151' : '#D1D5DB',
+                                  fontSize: 10,
+                                }}
+                              >
+                                {cell.count > 0 ? cell.count : '·'}
+                              </div>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {/* Legend */}
+                  <div className="flex items-center gap-2 mt-3 justify-end flex-wrap">
+                    {[
+                      { color: '#E8F5E9', label: t('Faible', 'منخفض', 'Low') },
+                      { color: '#FFD54F', label: t('Modéré', 'متوسط', 'Moderate') },
+                      { color: '#FFA726', label: t('Élevé', 'عالٍ', 'High') },
+                      { color: '#EF5350', label: t('Critique', 'حرج', 'Critical') },
+                    ].map((l, i) => (
+                      <div key={i} className="flex items-center gap-1">
+                        <div className="w-4 h-4 rounded" style={{ background: l.color, border: '1px solid #E5E7EB' }} />
+                        <span className="text-[9px] text-gray-500">{l.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* ── Correlations ── */}
         <div className="p-5 rounded-3xl bg-white" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #FFD54F, #FF8F00)' }}>
@@ -191,88 +490,37 @@ export default function Insights() {
 
           {!childId ? (
             <p className="text-xs text-gray-400 text-center py-4">
-              {t('Sélectionnez un enfant pour voir les corrélations', 'اختر طفلاً لرؤية الارتباطات', 'Select a child to see correlations')}
+              {t('Sélectionnez un enfant', 'اختر طفلاً', 'Select a child')}
             </p>
-          ) : corrLoading ? (
-            <div className="flex items-center justify-center py-4 gap-2">
-              <Loader2 size={16} className="animate-spin text-gray-400" />
-              <span className="text-xs text-gray-400">{t('Calcul en cours…', 'جارٍ الحساب…', 'Computing…')}</span>
-            </div>
           ) : correlations.length === 0 ? (
             <div className="flex flex-col items-center py-5 gap-2">
               <CheckCircle size={28} style={{ color: C.success }} />
               <p className="text-xs text-gray-500 text-center">
-                {t(
-                  `Aucune corrélation détectée (seuil : ${3} occurrences)`,
-                  `لم يتم اكتشاف أي ارتباط (الحد الأدنى: ${3} مرات)`,
-                  `No correlation detected yet (threshold: ${3} occurrences)`
-                )}
+                {t(`Aucune corrélation (seuil : 3 occurrences)`, `لا ارتباط (الحد: 3 مرات)`, `No correlation yet (threshold: 3×)`)}
               </p>
             </div>
           ) : (
             <div className="space-y-2">
               {correlations.map((c, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 p-3 rounded-2xl"
+                <div key={i} className="flex items-center gap-3 p-3 rounded-2xl"
                   style={{
                     background: c.avgSeverity >= 7 ? '#FFEBEE' : c.avgSeverity >= 4 ? '#FFF8E1' : '#E8F5E9',
                     border: `1px solid ${c.avgSeverity >= 7 ? '#FFCDD2' : c.avgSeverity >= 4 ? '#FFE082' : '#C8E6C9'}`,
-                  }}
-                >
-                  <div
-                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-black text-white"
-                    style={{ background: c.avgSeverity >= 7 ? C.danger : c.avgSeverity >= 4 ? C.warning : C.success }}
-                  >
+                  }}>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-black text-white"
+                    style={{ background: c.avgSeverity >= 7 ? C.danger : c.avgSeverity >= 4 ? C.warning : C.success }}>
                     {c.count}×
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-gray-800 truncate">
-                      🍽️ <span style={{ color: '#0288D1' }}>{c.food}</span>
-                      {' → '}
-                      🔴 <span style={{ color: C.danger }}>{c.symptom}</span>
+                      🍽️ <span style={{ color: '#0288D1' }}>{c.food}</span>{' → '}🔴 <span style={{ color: C.danger }}>{c.symptom}</span>
                     </p>
-                    <p className="text-[10px] text-gray-500">
-                      {t(`Sévérité moy. ${c.avgSeverity}/10`, `متوسط الشدة ${c.avgSeverity}/10`, `Avg severity ${c.avgSeverity}/10`)}
-                    </p>
+                    <p className="text-[10px] text-gray-500">{t(`Sév. moy. ${c.avgSeverity}/10`, `متوسط الشدة ${c.avgSeverity}/10`, `Avg severity ${c.avgSeverity}/10`)}</p>
                   </div>
                   <AlertTriangle size={14} style={{ color: c.avgSeverity >= 7 ? C.danger : C.warning, flexShrink: 0 }} />
                 </div>
               ))}
-              <p className="text-[10px] text-gray-400 text-center pt-1">
-                {t(
-                  `Détecté quand le même aliment précède le même symptôme ≥ ${3}× dans les 4h`,
-                  `يُكتشف عندما يسبق نفس الطعام نفس العرض ≥ ${3}× خلال 4 ساعات`,
-                  `Detected when the same food precedes the same symptom ≥ ${3}× within 4h`
-                )}
-              </p>
             </div>
-          )}
-        </div>
-
-        {/* ── Chart ── */}
-        <div className="p-5 rounded-3xl bg-white" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}>
-          <p className="text-sm font-extrabold text-gray-800 mb-4">
-            📊 {t('Repas vs Symptômes (7 jours)', 'الوجبات مقابل الأعراض (7 أيام)', 'Meals vs Symptoms (7 days)')}
-          </p>
-          {meals.length === 0 && symptoms.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-              <TrendingUp size={32} className="mb-2 opacity-40" />
-              <p className="text-xs text-center">
-                {t('Enregistrez des repas et symptômes pour voir le graphique', 'سجل وجبات وأعراضاً لرؤية الرسم البياني', 'Log meals and symptoms to see the chart')}
-              </p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-                <XAxis dataKey="label" tick={{ fontSize: 10, fill: '#9CA3AF' }} />
-                <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} allowDecimals={false} />
-                <Tooltip contentStyle={{ fontSize: 11, borderRadius: 12, border: 'none', boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }} />
-                <Bar dataKey="meals"    name={t('Repas', 'وجبات', 'Meals')}    fill={C.primary}    radius={[6, 6, 0, 0]} />
-                <Bar dataKey="symptoms" name={t('Symptômes', 'أعراض', 'Symptoms')} fill={C.secondary} radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
           )}
         </div>
 
@@ -282,41 +530,32 @@ export default function Insights() {
             <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #CE93D8, #8E24AA)' }}>
               <Loader2 size={28} color="white" className="animate-spin" />
             </div>
-            <p className="text-sm font-semibold text-gray-500">{t('Analyse IA en cours…', 'جارٍ التحليل بالذكاء الاصطناعي…', 'AI analysis in progress…')}</p>
-            <p className="text-xs text-gray-400 text-center">{t('Cela peut prendre 10 à 20 secondes', 'قد يستغرق ذلك 10 إلى 20 ثانية', 'This may take 10–20 seconds')}</p>
+            <p className="text-sm font-semibold text-gray-500">{t('Analyse IA en cours…', 'جارٍ التحليل…', 'AI analysis in progress…')}</p>
+            <p className="text-xs text-gray-400 text-center">{t('10 à 20 secondes', '10 إلى 20 ثانية', '10–20 seconds')}</p>
           </div>
         )}
 
         {/* ── AI Result ── */}
         {aiResult && !aiMutation.isPending && (
-          <div className="p-5 rounded-3xl bg-white space-y-4" style={{ boxShadow: '0 4px 20px rgba(142,36,170,0.12)', border: `2px solid #E1BEE7` }}>
-
-            {/* Title */}
+          <div className="p-5 rounded-3xl bg-white space-y-4" style={{ boxShadow: '0 4px 20px rgba(142,36,170,0.12)', border: '2px solid #E1BEE7' }}>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #CE93D8, #8E24AA)' }}>
                 <Brain size={16} color="white" />
               </div>
-              <p className="text-sm font-extrabold text-gray-800">
-                {t('Rapport IA personnalisé', 'تقرير الذكاء الاصطناعي المخصص', 'Personalized AI Report')}
-              </p>
+              <p className="text-sm font-extrabold text-gray-800">{t('Rapport IA personnalisé', 'تقرير الذكاء الاصطناعي', 'Personalized AI Report')}</p>
             </div>
 
-            {/* Risk badge */}
             <RiskBadge level={aiResult.riskLevel} isAr={isAr} isFr={isFr} />
 
-            {/* Summary */}
             {aiResult.summary && (
               <div className="px-3 py-2.5 rounded-2xl" style={{ background: '#F3E5F5', border: '1px solid #E1BEE7' }}>
                 <p className="text-xs text-purple-800 leading-relaxed font-medium">{aiResult.summary}</p>
               </div>
             )}
 
-            {/* Suspect food */}
             {aiResult.suspectFood && aiResult.suspectFood !== 'Aucun' && aiResult.suspectFood !== 'None' && (
               <div>
-                <p className="text-xs font-bold text-gray-700 mb-1">
-                  🚨 {t('Aliment le plus suspect', 'الطعام الأكثر اشتباهاً', 'Most suspect food')}
-                </p>
+                <p className="text-xs font-bold text-gray-700 mb-1">🚨 {t('Aliment le plus suspect', 'الطعام الأكثر اشتباهاً', 'Most suspect food')}</p>
                 <div className="px-3 py-2 rounded-2xl" style={{ background: '#FFEBEE', border: '1px solid #FFCDD2' }}>
                   <p className="text-sm font-extrabold" style={{ color: C.danger }}>{aiResult.suspectFood}</p>
                   <p className="text-[10px] text-gray-500 mb-1">{t('Niveau de confiance', 'مستوى الثقة', 'Confidence level')}</p>
@@ -325,30 +564,20 @@ export default function Insights() {
               </div>
             )}
 
-            {/* Main symptoms */}
             {aiResult.mainSymptoms && aiResult.mainSymptoms.length > 0 && (
               <div>
-                <p className="text-xs font-bold text-gray-700 mb-2">
-                  🔴 {t('Principaux symptômes observés', 'الأعراض الرئيسية المُلاحظة', 'Main symptoms observed')}
-                </p>
+                <p className="text-xs font-bold text-gray-700 mb-2">🔴 {t('Principaux symptômes', 'الأعراض الرئيسية', 'Main symptoms')}</p>
                 <div className="flex flex-wrap gap-2">
                   {aiResult.mainSymptoms.map((s: string, i: number) => (
-                    <span key={i} className="text-xs px-3 py-1 rounded-full font-semibold" style={{ background: '#FFF8E1', color: '#E65100', border: '1px solid #FFE082' }}>
-                      {s}
-                    </span>
+                    <span key={i} className="text-xs px-3 py-1 rounded-full font-semibold" style={{ background: '#FFF8E1', color: '#E65100', border: '1px solid #FFE082' }}>{s}</span>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Personalized advice */}
             {(aiResult.adviceAr || aiResult.adviceFr || aiResult.adviceEn) && (
               <div>
-                <button
-                  onClick={() => setShowAdvice(!showAdvice)}
-                  className="flex items-center gap-1 text-xs font-bold"
-                  style={{ color: C.purple }}
-                >
+                <button onClick={() => setShowAdvice(!showAdvice)} className="flex items-center gap-1 text-xs font-bold" style={{ color: C.purple }}>
                   {showAdvice ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                   {t('Conseils personnalisés', 'نصائح مخصصة', 'Personalized advice')}
                 </button>
@@ -362,13 +591,11 @@ export default function Insights() {
           </div>
         )}
 
-        {/* ── No child selected ── */}
+        {/* ── No child ── */}
         {!childId && (
           <div className="p-6 rounded-3xl bg-white flex flex-col items-center gap-3" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}>
             <Sparkles size={32} style={{ color: C.purple, opacity: 0.5 }} />
-            <p className="text-sm text-gray-400 text-center">
-              {t("Sélectionnez un enfant pour voir les insights", 'اختر طفلاً لرؤية التحليلات', 'Select a child to see insights')}
-            </p>
+            <p className="text-sm text-gray-400 text-center">{t('Sélectionnez un enfant pour voir les insights', 'اختر طفلاً لرؤية التحليلات', 'Select a child to see insights')}</p>
           </div>
         )}
 
@@ -376,21 +603,9 @@ export default function Insights() {
         <div className="space-y-3">
           <p className="text-sm font-extrabold text-gray-800">{t('Conseils généraux', 'نصائح عامة', 'General Tips')}</p>
           {[
-            {
-              icon: CheckCircle, gradient: `linear-gradient(135deg, #A5D6A7, #388E3C)`, shadow: 'rgba(165,214,167,0.4)',
-              title: t('Alimentation équilibrée', 'غذاء متوازن', 'Balanced Diet'),
-              desc: t('Assurez un mélange de fruits, légumes et protéines chaque jour.', 'احرص على تنوع الفواكه والخضروات والبروتينات يومياً.', 'Ensure a mix of fruits, vegetables, and proteins daily.'),
-            },
-            {
-              icon: TrendingUp, gradient: `linear-gradient(135deg, #90CAF9, #1565C0)`, shadow: 'rgba(144,202,249,0.4)',
-              title: t('Suivi régulier', 'المتابعة المنتظمة', 'Regular Monitoring'),
-              desc: t('Enregistrez les repas et symptômes quotidiennement pour de meilleures analyses.', 'سجل الوجبات والأعراض يومياً لتحليلات أفضل.', 'Log meals and symptoms daily for better analysis.'),
-            },
-            {
-              icon: AlertTriangle, gradient: `linear-gradient(135deg, #FFCC80, #E65100)`, shadow: 'rgba(255,204,128,0.4)',
-              title: t('Consultez un médecin', 'استشر طبيباً', 'Consult a Doctor'),
-              desc: t('En cas de symptômes persistants, consultez toujours un pédiatre.', 'في حالة الأعراض المستمرة، استشر دائماً طبيب الأطفال.', 'For persistent symptoms, always consult a pediatrician.'),
-            },
+            { icon: CheckCircle, gradient: 'linear-gradient(135deg, #A5D6A7, #388E3C)', shadow: 'rgba(165,214,167,0.4)', title: t('Alimentation équilibrée', 'غذاء متوازن', 'Balanced Diet'), desc: t('Assurez un mélange de fruits, légumes et protéines chaque jour.', 'احرص على تنوع الفواكه والخضروات والبروتينات يومياً.', 'Ensure a mix of fruits, vegetables, and proteins daily.') },
+            { icon: TrendingUp,  gradient: 'linear-gradient(135deg, #90CAF9, #1565C0)', shadow: 'rgba(144,202,249,0.4)', title: t('Suivi régulier', 'المتابعة المنتظمة', 'Regular Monitoring'), desc: t('Enregistrez les repas et symptômes quotidiennement pour de meilleures analyses.', 'سجل الوجبات والأعراض يومياً لتحليلات أفضل.', 'Log meals and symptoms daily for better analysis.') },
+            { icon: AlertTriangle, gradient: 'linear-gradient(135deg, #FFCC80, #E65100)', shadow: 'rgba(255,204,128,0.4)', title: t('Consultez un médecin', 'استشر طبيباً', 'Consult a Doctor'), desc: t('En cas de symptômes persistants, consultez toujours un pédiatre.', 'في حالة الأعراض المستمرة، استشر دائماً طبيب الأطفال.', 'For persistent symptoms, always consult a pediatrician.') },
           ].map((tip, i) => {
             const Icon = tip.icon;
             return (

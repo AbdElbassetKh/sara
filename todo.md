@@ -224,3 +224,14 @@
 - [x] Ajouter bannière de corrélation dans Dashboard.tsx (si ≥ 1 corrélation détectée, cliquable vers /insights)
 - [x] 0 erreur TypeScript · 21 tests passants
 - [x] Guide d'installation rédigé et livré à l'utilisateur
+
+## Phase 30 : Graphiques Insights — Évolution des symptômes
+
+- [x] Procédure tRPC `insights.getSymptomTimeSeries` : données journalières sur N jours (count + sévérité moy. + repas)
+- [x] Procédure tRPC `insights.getSymptomFrequency` : fréquence par type de symptôme (top 10)
+- [x] Procédure tRPC `insights.getMealSymptomHeatmap` : matrice aliment × symptôme (top 6×6)
+- [x] Graphique 1 : AreaChart évolution des symptômes + sévérité + repas (dégradés)
+- [x] Graphique 2 : BarChart horizontal fréquence par type de symptôme
+- [x] Graphique 3 : Heatmap aliment × symptôme (code couleur vert→rouge)
+- [x] Sélecteur de période (7j / 14j / 30j) et onglets de graphiques
+- [x] 0 erreur TypeScript · 21 tests passants

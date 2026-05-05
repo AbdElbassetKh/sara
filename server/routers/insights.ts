@@ -174,4 +174,125 @@ export const insightsRouter = router({
         summary: string;
       };
     }),
+
+  // ─── 3. SYMPTOM TIME SERIES ───────────────────────────────────────────────────────────────────────────────────
+  /**
+   * Returns daily symptom counts and average severity for the last N days.
+   * Used for the LineChart on the Insights page.
+   */
+  getSymptomTimeSeries: protectedProcedure
+    .input(z.object({ childId: z.number(), days: z.number().min(7).max(90).default(30) }))
+    .query(async ({ input }) => {
+      const symptoms = await getSymptomEntriesByChildId(input.childId, 500);
+      const meals    = await getFoodEntriesByChildId(input.childId, 500);
+
+      const result: { date: string; symptoms: number; avgSeverity: number; meals: number }[] = [];
+
+      for (let i = input.days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+
+        const daySymptoms = symptoms.filter(s => new Date(s.occurredAt).toISOString().split('T')[0] === dateStr);
+        const dayMeals    = meals.filter(m => new Date(m.eatenAt).toISOString().split('T')[0] === dateStr);
+
+        const avgSev = daySymptoms.length > 0
+          ? Math.round((daySymptoms.reduce((acc, s) => acc + s.severity, 0) / daySymptoms.length) * 10) / 10
+          : 0;
+
+        result.push({ date: dateStr, symptoms: daySymptoms.length, avgSeverity: avgSev, meals: dayMeals.length });
+      }
+
+      return result;
+    }),
+
+  // ─── 4. SYMPTOM FREQUENCY BY TYPE ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * Returns symptom frequency grouped by type, sorted by count.
+   * Used for the BarChart / RadarChart on the Insights page.
+   */
+  getSymptomFrequency: protectedProcedure
+    .input(z.object({ childId: z.number(), days: z.number().min(7).max(90).default(30) }))
+    .query(async ({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      const symptoms = await getSymptomEntriesByChildId(input.childId, 500);
+      const filtered = symptoms.filter(s => new Date(s.occurredAt) >= since);
+
+      const freqMap = new Map<string, { count: number; totalSeverity: number }>();
+      for (const s of filtered) {
+        const key = s.symptomType;
+        const existing = freqMap.get(key);
+        if (existing) {
+          existing.count++;
+          existing.totalSeverity += s.severity;
+        } else {
+          freqMap.set(key, { count: 1, totalSeverity: s.severity });
+        }
+      }
+
+      return Array.from(freqMap.entries())
+        .map(([type, { count, totalSeverity }]) => ({
+          type,
+          count,
+          avgSeverity: Math.round((totalSeverity / count) * 10) / 10,
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10); // top 10
+    }),
+
+  // ─── 5. MEAL × SYMPTOM HEATMAP DATA ─────────────────────────────────────────────────────────────────────────────
+  /**
+   * Returns a matrix of food × symptom co-occurrences (within 4h window).
+   * Used for the heatmap on the Insights page.
+   * Returns top 6 foods × top 6 symptoms for readability.
+   */
+  getMealSymptomHeatmap: protectedProcedure
+    .input(z.object({ childId: z.number(), days: z.number().min(7).max(90).default(30) }))
+    .query(async ({ input }) => {
+      const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
+      const [allMeals, allSymptoms] = await Promise.all([
+        getFoodEntriesByChildId(input.childId, 500),
+        getSymptomEntriesByChildId(input.childId, 500),
+      ]);
+
+      const meals    = allMeals.filter(m => new Date(m.eatenAt) >= since);
+      const symptoms = allSymptoms.filter(s => new Date(s.occurredAt) >= since);
+
+      // Build co-occurrence map: food × symptom → count
+      const coMap = new Map<string, number>();
+      const foodCounts  = new Map<string, number>();
+      const symptomCounts = new Map<string, number>();
+
+      for (const meal of meals) {
+        const mealTime = new Date(meal.eatenAt).getTime();
+        const windowEnd = mealTime + 4 * 60 * 60 * 1000;
+        const food = meal.foodName.trim();
+
+        for (const s of symptoms) {
+          const st = new Date(s.occurredAt).getTime();
+          if (st >= mealTime && st <= windowEnd) {
+            const symptom = s.symptomType.trim();
+            const key = `${food}|||${symptom}`;
+            coMap.set(key, (coMap.get(key) ?? 0) + 1);
+            foodCounts.set(food, (foodCounts.get(food) ?? 0) + 1);
+            symptomCounts.set(symptom, (symptomCounts.get(symptom) ?? 0) + 1);
+          }
+        }
+      }
+
+      // Top 6 foods and top 6 symptoms by co-occurrence count
+      const topFoods    = Array.from(foodCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6).map(e => e[0]);
+      const topSymptoms = Array.from(symptomCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 6).map(e => e[0]);
+
+      // Build matrix
+      const matrix = topFoods.map(food => ({
+        food,
+        values: topSymptoms.map(symptom => ({
+          symptom,
+          count: coMap.get(`${food}|||${symptom}`) ?? 0,
+        })),
+      }));
+
+      return { foods: topFoods, symptoms: topSymptoms, matrix };
+    }),
 });
