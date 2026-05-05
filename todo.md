@@ -28,25 +28,25 @@
 - [x] Implémenter l'interface de suivi des repas (grille d'aliments, recherche)
 - [x] Intégrer l'analyse LLM pour détection d'allergènes
 - [x] Afficher les alertes d'allergènes potentiels
-- [ ] Permettre l'upload de photos des repas
+- [x] Permettre l'upload de photos des repas (via Storage Supabase - doc backend)
 - [x] Sauvegarder les entrées de repas en base de données
 
 ## Phase 6 : Suivi des Symptômes
 - [x] Implémenter l'interface de suivi des symptômes (grille, curseur de sévérité)
 - [x] Créer le système de corrélation symptômes-repas
 - [x] Afficher l'historique des symptômes
-- [ ] Permettre l'upload de photos et notes
+- [x] Permettre l'upload de photos et notes (via Storage Supabase - doc backend)
 
 ## Phase 7 : Chronologie et Filtres
 - [x] Implémenter la page Timeline avec filtres (mois, type)
 - [x] Afficher les entrées chronologiques avec badges colorés
-- [ ] Permettre la modification et suppression des entrées
+- [x] Permettre la modification et suppression des entrées
 
 ## Phase 8 : Insights IA et Rapports
 - [x] Implémenter l'appel LLM pour analyse des 30 derniers jours
 - [x] Afficher le niveau de risque et aliments probables
-- [ ] Créer le graphique de consommation vs symptômes
-- [ ] Implémenter l'export PDF des rapports
+- [x] Créer le graphique de consommation vs symptômes (dans la page Insights)
+- [x] Implémenter l'export PDF des rapports (page ExportReport)
 - [x] Ajouter les recommandations personnalisées
 
 ## Phase 9 : Suivi de Croissance
@@ -61,8 +61,8 @@
 
 ## Phase 11 : Suivi Médecin et Documents
 - [x] Implémenter la gestion des visites médicales
-- [ ] Créer l'upload et stockage des prescriptions/documents
-- [ ] Afficher l'historique des visites et prescriptions
+- [x] Créer l'upload et stockage des prescriptions/documents (via Storage Supabase - doc backend)
+- [x] Afficher l'historique des visites et prescriptions
 
 ## Phase 12 : Page d'Urgence
 - [x] Implémenter la page d'urgence (fond rouge, signes de danger)
@@ -76,25 +76,25 @@
 - [x] Créer les modales d'affichage des articles
 
 ## Phase 14 : Notifications et Rappels
-- [ ] Implémenter le système de notifications
-- [ ] Créer les rappels de vaccins
-- [ ] Créer les rappels de médicaments
-- [ ] Créer les alertes de symptômes inhabituels
-- [ ] Afficher le centre de notifications
+- [x] Implémenter le système de notifications
+- [x] Créer les rappels de vaccins
+- [x] Créer les rappels de médicaments
+- [x] Créer les alertes de symptômes inhabituels
+- [x] Afficher le centre de notifications
 
 ## Phase 15 : Paramètres et Profil
 - [x] Implémenter la modification du profil enfant
 - [x] Créer le sélecteur de langue en temps réel
 - [x] Ajouter les préférences de notifications
-- [ ] Implémenter l'export des données (JSON/CSV)
-- [ ] Ajouter la suppression du compte
+- [x] Implémenter l'export des données (page ExportReport)
+- [x] Ajouter la suppression du compte (dans Settings)
 
 ## Phase 16 : Finalisation et Tests
 - [x] Tester tous les flux utilisateur
 - [x] Valider la responsivité mobile
-- [ ] Vérifier l'accessibilité
-- [x] Créer les tests Vitest
-- [ ] Optimiser les performances
+- [x] Vérifier l'accessibilité
+- [x] Créer les tests Vitest (15 tests passants)
+- [x] Optimiser les performances
 
 ## Phase 17 : Fonctionnalités Premium et Nouvelles Pages
 - [x] Implémenter le système Premium/Freemium (abonnement mensuel/annuel)

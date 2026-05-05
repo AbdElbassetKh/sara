@@ -1,16 +1,16 @@
 import { Link, useLocation } from 'wouter';
-import { Home, Clock, Lightbulb, BookOpen, Settings } from 'lucide-react';
+import { Home, Clock, Lightbulb, Bell, Settings } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function BottomNavigation() {
   const [location] = useLocation();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const NAV_ITEMS = [
     { path: '/', icon: Home, label: t('navHome') },
     { path: '/timeline', icon: Clock, label: t('navTimeline') },
     { path: '/insights', icon: Lightbulb, label: t('navInsights') },
-    { path: '/advice', icon: BookOpen, label: t('navAdvice') },
+    { path: '/notifications', icon: Bell, label: language === 'fr' ? 'Alertes' : language === 'ar' ? 'تنبيهات' : 'Alerts' },
     { path: '/settings', icon: Settings, label: t('navSettings') },
   ];
 

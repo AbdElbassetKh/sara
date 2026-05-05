@@ -1,168 +1,293 @@
+import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { Lightbulb, TrendingUp, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { trpc } from '@/lib/trpc';
+import { useAppContext } from '@/contexts/AppContext';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
+import {
+  Lightbulb, TrendingUp, AlertTriangle, CheckCircle, Loader2,
+  RefreshCw, Syringe, ChevronDown, ChevronUp
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Insights() {
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
+  const { selectedChild } = useAppContext();
+  const selectedChildId = selectedChild?.id ?? null;
+  const [showFullReport, setShowFullReport] = useState(false);
 
-  const INSIGHTS = [
-    {
-      id: 1,
-      type: 'warning',
-      icon: AlertTriangle,
-      title: language === 'fr' ? 'Schéma allergène potentiel' : language === 'ar' ? 'نمط مسبب حساسية محتمل' : 'Potential Allergen Pattern',
-      description: language === 'fr'
-        ? 'Des symptômes de rash apparaissent 2-3h après les produits laitiers. Envisagez de limiter le lait.'
-        : language === 'ar'
-        ? 'تظهر أعراض الطفح الجلدي بعد 2-3 ساعات من منتجات الألبان. فكر في تقليل الحليب.'
-        : 'Rash symptoms appear 2-3 hours after dairy products. Consider limiting milk intake.',
-      severity: 'high',
-      color: 'text-red-600',
-    },
-    {
-      id: 2,
-      type: 'insight',
-      icon: Lightbulb,
-      title: language === 'fr' ? 'Recommandation nutritionnelle' : language === 'ar' ? 'توصية غذائية' : 'Nutrition Recommendation',
-      description: language === 'fr'
-        ? 'Votre enfant reçoit suffisamment de protéines. Ajoutez des aliments riches en fer comme les épinards.'
-        : language === 'ar'
-        ? 'طفلك يحصل على بروتين كافٍ. فكر في إضافة أطعمة غنية بالحديد مثل السبانخ.'
-        : 'Your child is getting adequate protein. Consider adding more iron-rich foods like spinach.',
-      severity: 'medium',
-      color: 'text-blue-600',
-    },
-    {
-      id: 3,
-      type: 'positive',
-      icon: CheckCircle,
-      title: language === 'fr' ? 'Croissance dans les normes' : language === 'ar' ? 'النمو ضمن المعدل الطبيعي' : 'Growth on Track',
-      description: language === 'fr'
-        ? 'Les mesures de croissance sont dans les percentiles normaux pour l\'âge. Bravo !'
-        : language === 'ar'
-        ? 'قياسات النمو ضمن النسب المئوية الطبيعية للعمر. عمل رائع!'
-        : 'Growth measurements are within normal percentiles for age. Great job!',
-      severity: 'low',
-      color: 'text-green-600',
-    },
-    {
-      id: 4,
-      type: 'insight',
-      icon: TrendingUp,
-      title: language === 'fr' ? 'Tendance des symptômes' : language === 'ar' ? 'اتجاه الأعراض' : 'Symptom Trend',
-      description: language === 'fr'
-        ? 'La fréquence des symptômes a diminué de 40% ces 2 dernières semaines.'
-        : language === 'ar'
-        ? 'انخفض تكرار الأعراض بنسبة 40% في الأسبوعين الماضيين.'
-        : 'Symptom frequency has decreased by 40% in the last 2 weeks.',
-      severity: 'low',
-      color: 'text-green-600',
-    },
-    {
-      id: 5,
-      type: 'warning',
-      icon: AlertTriangle,
-      title: language === 'fr' ? 'Rappel de vaccination' : language === 'ar' ? 'تذكير بالتطعيم' : 'Vaccination Reminder',
-      description: language === 'fr'
-        ? 'Le vaccin Polio 3 est prévu la semaine prochaine. Prenez rendez-vous avec votre pédiatre.'
-        : language === 'ar'
-        ? 'موعد لقاح شلل الأطفال 3 الأسبوع القادم. احجز موعداً مع طبيب الأطفال.'
-        : 'Polio 3 vaccination is due next week. Schedule an appointment with your pediatrician.',
-      severity: 'medium',
-      color: 'text-orange-600',
-    },
-  ];
+  const t = (fr: string, ar: string, en: string) =>
+    language === 'fr' ? fr : language === 'ar' ? ar : en;
 
-  const TIPS = [
-    {
-      emoji: '🥗',
-      title: language === 'fr' ? 'Alimentation équilibrée' : language === 'ar' ? 'غذاء متوازن' : 'Balanced Diet',
-      desc: language === 'fr' ? 'Assurez un mélange de fruits, légumes et protéines chaque jour.' : language === 'ar' ? 'احرص على تنوع الفواكه والخضروات والبروتينات يومياً.' : 'Ensure a mix of fruits, vegetables, and proteins daily.',
-    },
-    {
-      emoji: '💧',
-      title: language === 'fr' ? 'Rester hydraté' : language === 'ar' ? 'الترطيب الكافي' : 'Stay Hydrated',
-      desc: language === 'fr' ? 'Proposez de l\'eau régulièrement tout au long de la journée.' : language === 'ar' ? 'قدم الماء بانتظام على مدار اليوم.' : 'Offer water regularly throughout the day.',
-    },
-    {
-      emoji: '😴',
-      title: language === 'fr' ? 'Sommeil suffisant' : language === 'ar' ? 'نوم كافٍ' : 'Adequate Sleep',
-      desc: language === 'fr' ? 'Assurez 10-12 heures de sommeil de qualité pour une santé optimale.' : language === 'ar' ? 'احرص على 10-12 ساعة من النوم الجيد للصحة المثلى.' : 'Ensure 10-12 hours of quality sleep for optimal health.',
-    },
-  ];
+  // Fetch real data from DB
+  const { data: meals = [] } = trpc.meals.list.useQuery(
+    { childId: selectedChildId ?? 0 },
+    { enabled: !!selectedChildId }
+  );
+  const { data: symptoms = [] } = trpc.symptoms.list.useQuery(
+    { childId: selectedChildId ?? 0 },
+    { enabled: !!selectedChildId }
+  );
 
-  const getBackgroundColor = (severity: string) => {
-    switch (severity) {
-      case 'high': return 'bg-red-50 border-red-200';
-      case 'medium': return 'bg-orange-50 border-orange-200';
-      default: return 'bg-green-50 border-green-200';
+  // AI analysis mutation
+  const analysisMutation = trpc.meals.analyzeInsights.useMutation({
+    onError: () => toast.error(t('Erreur lors de l\'analyse IA', 'خطأ في تحليل الذكاء الاصطناعي', 'AI analysis error')),
+  });
+
+  // Build chart data: last 7 days meals count vs symptoms count
+  const chartData = useMemo(() => {
+    const days: { date: string; label: string; meals: number; symptoms: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const label = d.toLocaleDateString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', { weekday: 'short' });
+
+      const mealsCount = meals.filter(m => {
+        const mDate = new Date(m.eatenAt).toISOString().split('T')[0];
+        return mDate === dateStr;
+      }).length;
+
+      const symptomsCount = symptoms.filter(s => {
+        const sDate = new Date(s.occurredAt).toISOString().split('T')[0];
+        return sDate === dateStr;
+      }).length;
+
+      days.push({ date: dateStr, label, meals: mealsCount, symptoms: symptomsCount });
     }
+    return days;
+  }, [meals, symptoms, language]);
+
+  // Compute stats
+  const totalMeals = meals.length;
+  const totalSymptoms = symptoms.length;
+  const highRiskMeals = meals.filter(m => m.aiAnalysis?.riskLevel === 'high').length;
+  const allergenMeals = meals.filter(m => (m.aiAnalysis?.allergens?.length ?? 0) > 0).length;
+
+  const handleRunAnalysis = () => {
+    if (!selectedChildId) {
+      toast.error(t('Sélectionnez un enfant d\'abord', 'اختر طفلاً أولاً', 'Select a child first'));
+      return;
+    }
+    analysisMutation.mutate({ childId: selectedChildId });
   };
 
-  const getSeverityLabel = (severity: string) => {
-    if (severity === 'high') return `🔴 ${t('high')}`;
-    if (severity === 'medium') return `🟡 ${t('medium')}`;
-    return `🟢 ${t('low')}`;
-  };
+  const aiResult = analysisMutation.data;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header */}
-        <div className="pt-2">
-          <h1 className="text-2xl font-bold text-foreground">{t('aiInsights')}</h1>
+        <div className="pt-2 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">
+              {t('Insights IA', 'رؤى الذكاء الاصطناعي', 'AI Insights')}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {t('Analyse des 30 derniers jours', 'تحليل آخر 30 يوماً', 'Last 30 days analysis')}
+            </p>
+          </div>
+          <Button
+            onClick={handleRunAnalysis}
+            disabled={analysisMutation.isPending || !selectedChildId}
+            size="sm"
+            className="gap-1.5"
+          >
+            {analysisMutation.isPending
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <RefreshCw className="w-4 h-4" />}
+            {t('Analyser', 'تحليل', 'Analyze')}
+          </Button>
         </div>
 
-        {/* Info Banner */}
-        <Card className="bg-gradient-to-r from-primary/10 to-blue-50 p-4 border-0 shadow-sm">
-          <p className="text-sm font-medium text-foreground">
-            🤖{' '}
-            {language === 'fr'
-              ? "Notre IA analyse les données de santé de votre enfant pour vous fournir des recommandations personnalisées."
-              : language === 'ar'
-              ? 'يحلل ذكاؤنا الاصطناعي بيانات صحة طفلك لتقديم توصيات شخصية.'
-              : "Our AI analyzes your child's health data to provide personalized insights and recommendations."}
-          </p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <Card className="p-3 text-center">
+            <p className="text-2xl font-bold text-primary">{totalMeals}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('Repas enregistrés', 'وجبات مسجلة', 'Meals logged')}</p>
+          </Card>
+          <Card className="p-3 text-center">
+            <p className="text-2xl font-bold text-orange-500">{totalSymptoms}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('Symptômes signalés', 'أعراض مبلغ عنها', 'Symptoms reported')}</p>
+          </Card>
+          <Card className="p-3 text-center">
+            <p className="text-2xl font-bold text-red-500">{highRiskMeals}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('Repas à risque élevé', 'وجبات عالية الخطر', 'High-risk meals')}</p>
+          </Card>
+          <Card className="p-3 text-center">
+            <p className="text-2xl font-bold text-yellow-500">{allergenMeals}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('Allergènes détectés', 'مسببات حساسية', 'Allergens detected')}</p>
+          </Card>
+        </div>
+
+        {/* Chart: Meals vs Symptoms last 7 days */}
+        <Card className="p-4 shadow-sm">
+          <h2 className="text-sm font-semibold text-foreground mb-3">
+            📊 {t('Repas vs Symptômes (7 jours)', 'الوجبات مقابل الأعراض (7 أيام)', 'Meals vs Symptoms (7 days)')}
+          </h2>
+          {totalMeals === 0 && totalSymptoms === 0 ? (
+            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+              <TrendingUp className="w-8 h-8 mb-2 opacity-40" />
+              <p className="text-xs text-center">
+                {t('Enregistrez des repas et symptômes pour voir le graphique', 'سجل وجبات وأعراضاً لرؤية الرسم البياني', 'Log meals and symptoms to see the chart')}
+              </p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={180}>
+              <BarChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ fontSize: 11, borderRadius: 8 }}
+                  formatter={(value: number, name: string) => [
+                    value,
+                    name === 'meals'
+                      ? t('Repas', 'وجبات', 'Meals')
+                      : t('Symptômes', 'أعراض', 'Symptoms')
+                  ]}
+                />
+                <Legend
+                  formatter={(value) =>
+                    value === 'meals'
+                      ? t('Repas', 'وجبات', 'Meals')
+                      : t('Symptômes', 'أعراض', 'Symptoms')
+                  }
+                  wrapperStyle={{ fontSize: 11 }}
+                />
+                <Bar dataKey="meals" fill="#4FC3F7" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="symptoms" fill="#F8BBD0" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </Card>
 
-        {/* Insights List */}
-        <div className="space-y-3">
-          {INSIGHTS.map((insight) => {
-            const Icon = insight.icon;
-            return (
-              <Card key={insight.id} className={`p-4 border-2 ${getBackgroundColor(insight.severity)} shadow-sm`}>
-                <div className="flex gap-3">
-                  <Icon size={18} className={`${insight.color} flex-shrink-0 mt-1`} />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground text-sm">{insight.title}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">{insight.description}</p>
-                    <span className="inline-block text-xs font-medium px-2 py-0.5 rounded-full bg-white/70 mt-2">
-                      {getSeverityLabel(insight.severity)}
+        {/* AI Analysis Result */}
+        {analysisMutation.isPending && (
+          <Card className="p-6 flex flex-col items-center gap-3">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm text-muted-foreground">
+              {t('Analyse IA en cours…', 'جارٍ التحليل بالذكاء الاصطناعي…', 'AI analysis in progress…')}
+            </p>
+          </Card>
+        )}
+
+        {aiResult && (
+          <Card className="p-4 border-2 border-primary/20 bg-primary/3 shadow-sm space-y-3">
+            <div className="flex items-center gap-2">
+              <Lightbulb className="w-5 h-5 text-primary" />
+              <h2 className="text-sm font-bold text-foreground">
+                {t('Rapport IA personnalisé', 'تقرير الذكاء الاصطناعي المخصص', 'Personalized AI Report')}
+              </h2>
+            </div>
+
+            {/* Risk Level */}
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+              aiResult.riskLevel === 'high' ? 'bg-red-50 text-red-700' :
+              aiResult.riskLevel === 'medium' ? 'bg-orange-50 text-orange-700' :
+              'bg-green-50 text-green-700'
+            }`}>
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span className="text-xs font-semibold">
+                {t('Niveau de risque', 'مستوى الخطر', 'Risk level')} :{' '}
+                {aiResult.riskLevel === 'high'
+                  ? t('Élevé', 'عالٍ', 'High')
+                  : aiResult.riskLevel === 'medium'
+                  ? t('Moyen', 'متوسط', 'Medium')
+                  : t('Faible', 'منخفض', 'Low')}
+              </span>
+            </div>
+
+            {/* Trigger Foods */}
+            {aiResult.triggerFoods && aiResult.triggerFoods.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-foreground mb-1.5">
+                  🚨 {t('Aliments déclencheurs probables', 'الأطعمة المحتملة المسببة', 'Probable trigger foods')} :
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {aiResult.triggerFoods.map((food: string, i: number) => (
+                    <span key={i} className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                      {food}
                     </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Recommendations */}
+            {aiResult.recommendations && (
+              <div>
+                <button
+                  onClick={() => setShowFullReport(!showFullReport)}
+                  className="flex items-center gap-1 text-xs font-semibold text-primary"
+                >
+                  {showFullReport ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  {t('Recommandations détaillées', 'التوصيات التفصيلية', 'Detailed recommendations')}
+                </button>
+                {showFullReport && (
+                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed whitespace-pre-wrap">
+                    {aiResult.recommendations}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Vaccine Reminders */}
+            {aiResult.vaccineReminders && aiResult.vaccineReminders.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-foreground mb-1.5">
+                  💉 {t('Rappels vaccins', 'تذكيرات التطعيم', 'Vaccine reminders')} :
+                </p>
+                {aiResult.vaccineReminders.map((r: string, i: number) => (
+                  <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <Syringe className="w-3.5 h-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
+                    <span>{r}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        )}
+
+        {/* Static Insights (always shown as baseline) */}
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-foreground">
+            {t('Conseils généraux', 'نصائح عامة', 'General Tips')}
+          </h2>
+          {[
+            {
+              icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50 border-green-200',
+              title: t('Alimentation équilibrée', 'غذاء متوازن', 'Balanced Diet'),
+              desc: t('Assurez un mélange de fruits, légumes et protéines chaque jour.', 'احرص على تنوع الفواكه والخضروات والبروتينات يومياً.', 'Ensure a mix of fruits, vegetables, and proteins daily.'),
+            },
+            {
+              icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-200',
+              title: t('Suivi régulier', 'المتابعة المنتظمة', 'Regular Monitoring'),
+              desc: t('Enregistrez les repas et symptômes quotidiennement pour de meilleures analyses.', 'سجل الوجبات والأعراض يومياً لتحليلات أفضل.', 'Log meals and symptoms daily for better analysis.'),
+            },
+            {
+              icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200',
+              title: t('Consultez un médecin', 'استشر طبيباً', 'Consult a Doctor'),
+              desc: t('En cas de symptômes persistants, consultez toujours un pédiatre.', 'في حالة الأعراض المستمرة، استشر دائماً طبيب الأطفال.', 'For persistent symptoms, always consult a pediatrician.'),
+            },
+          ].map((tip, i) => {
+            const Icon = tip.icon;
+            return (
+              <Card key={i} className={`p-4 border ${tip.bg}`}>
+                <div className="flex gap-3">
+                  <Icon className={`w-4 h-4 ${tip.color} flex-shrink-0 mt-0.5`} />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">{tip.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{tip.desc}</p>
                   </div>
                 </div>
               </Card>
             );
           })}
         </div>
-
-        {/* Tips Section */}
-        <Card className="p-5 space-y-4 shadow-sm">
-          <h2 className="text-base font-semibold text-foreground">
-            💡 {language === 'fr' ? 'Conseils santé' : language === 'ar' ? 'نصائح صحية' : 'Health Tips'}
-          </h2>
-          <div className="space-y-4">
-            {TIPS.map((tip, i) => (
-              <div key={i} className="flex gap-3">
-                <span className="text-2xl">{tip.emoji}</span>
-                <div>
-                  <p className="font-medium text-foreground text-sm">{tip.title}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{tip.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
       </div>
     </div>
   );
