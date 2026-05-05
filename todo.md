@@ -159,3 +159,11 @@
 - [x] Ajouter le bouton Rendez-vous dans les Quick Actions du Dashboard
 - [x] Système de rappel : notification créée automatiquement 24h avant le RDV
 - [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 24 : Page sélection enfant (avant Dashboard)
+- [x] Analyser AppContext et flux de navigation existant
+- [x] Créer ChildSelector.tsx (liste des enfants avec avatars + bouton ajouter)
+- [x] Intégrer dans App.tsx : afficher ChildSelector si aucun enfant sélectionné
+- [x] Persister le choix de l'enfant dans AppContext (selectedChild)
+- [x] Traductions FR/EN/AR complètes
+- [x] 0 erreur TypeScript · 21 tests passants

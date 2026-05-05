@@ -11,7 +11,10 @@ import ChildProfileSetup from "./pages/ChildProfileSetup";
 import Dashboard from "./pages/Dashboard";
 import BottomNavigation from "./components/BottomNavigation";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
+import { useAppContext } from "./contexts/AppContext";
+import { trpc } from "./lib/trpc";
+import type { ChildProfile } from "./contexts/AppContext";
 
 const Meals = lazy(() => import('./pages/Meals'));
 const EmergencyPage = lazy(() => import('./pages/EmergencyPage'));
@@ -30,9 +33,31 @@ const ExportReport = lazy(() => import('./pages/ExportReport'));
 const Legal = lazy(() => import('./pages/Legal'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const Appointments = lazy(() => import('./pages/Appointments'));
+const ChildSelector = lazy(() => import('./pages/ChildSelector'));
 
 function Router() {
   const { isAuthenticated, loading } = useAuth();
+  const { selectedChild, setChildren } = useAppContext();
+
+  // Load children list and auto-select if only one child
+  const { data: childrenData } = trpc.children.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (childrenData && childrenData.length > 0) {
+      const mapped: ChildProfile[] = childrenData.map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        birthDate: c.birthDate ?? '',
+        gender: (c.gender as 'boy' | 'girl') ?? 'boy',
+        allergies: Array.isArray(c.allergies) ? c.allergies : [],
+        photoUrl: c.photoUrl ?? undefined,
+      }));
+      setChildren(mapped);
+    }
+  }, [childrenData, setChildren]);
 
   if (loading) {
     return (
@@ -51,11 +76,28 @@ function Router() {
     );
   }
 
+  // Show child selector if authenticated but no child selected yet
+  const showChildSelector = isAuthenticated && !selectedChild && !loading;
+
+  if (showChildSelector) {
+    return (
+      <div className="mobile-container">
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" /></div>}>
+          <Switch>
+            <Route path="/setup" component={ChildProfileSetup} />
+            <Route component={ChildSelector} />
+          </Switch>
+        </Suspense>
+      </div>
+    );
+  }
+
   return (
     <div className="mobile-container">
       <Suspense fallback={<div className="p-4 pb-24">Loading...</div>}>
         <Switch>
           <Route path="/setup" component={ChildProfileSetup} />
+          <Route path="/child-select" component={ChildSelector} />
           <Route path="/" component={Dashboard} />
           <Route path="/meals" component={Meals} />
           <Route path="/emergency" component={EmergencyPage} />
