@@ -169,6 +169,18 @@ export default function Insights() {
           )}
         </Card>
 
+        {/* Disclaimer médical – avant les résultats IA */}
+        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5">
+          <span className="text-amber-500 text-sm flex-shrink-0 mt-0.5">⚠️</span>
+          <p className="text-[10px] text-amber-700 font-medium leading-relaxed">
+            {language === 'ar'
+              ? 'هذا التطبيق أداة مساعدة وليس بديلاً عن الاستشارة الطبية المتخصصة. استشر دائماً طبيباً لأي مشكلة صحية.'
+              : language === 'fr'
+              ? "Cette application est une aide, pas un remplacement d'un avis médical. Consultez toujours un médecin pour tout problème de santé."
+              : 'This app is a health aid tool, not a replacement for professional medical advice. Always consult a doctor for any health concern.'}
+          </p>
+        </div>
+
         {/* AI Analysis Result */}
         {analysisMutation.isPending && (
           <Card className="p-6 flex flex-col items-center gap-3">
@@ -292,6 +304,8 @@ export default function Insights() {
             );
           })}
         </div>
+
+
       </div>
     </div>
   );

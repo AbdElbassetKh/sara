@@ -117,3 +117,11 @@
 - [x] Intégrer la signature dans ChildProfileSetup.tsx (header + footer)
 - [x] 0 erreur TypeScript après toutes les modifications
 - [x] 15 tests unitaires passants
+
+## Phase 19 : Disclaimer Médical
+- [x] Ajouter la clé `medicalDisclaimer` dans translations.ts (EN/FR/AR)
+- [x] Afficher le disclaimer dans Onboarding.tsx
+- [x] Afficher le disclaimer dans Dashboard.tsx (bandeau discret)
+- [x] Afficher le disclaimer dans Insights.tsx (avant les recommandations IA)
+- [x] Afficher le disclaimer dans EmergencyPage.tsx
+- [x] Afficher le disclaimer dans Advice.tsx

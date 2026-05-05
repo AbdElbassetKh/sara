@@ -102,6 +102,18 @@ export default function Onboarding() {
           </div>
         </div>
 
+        {/* Disclaimer médical */}
+        <div className="flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 text-left">
+          <span className="text-amber-500 text-sm flex-shrink-0 mt-0.5">⚠️</span>
+          <p className="text-[10px] text-amber-700 font-medium leading-relaxed">
+            {language === 'ar'
+              ? 'هذا التطبيق أداة مساعدة وليس بديلاً عن الاستشارة الطبية المتخصصة. استشر دائماً طبيباً لأي مشكلة صحية.'
+              : language === 'fr'
+              ? "Cette application est une aide, pas un remplacement d'un avis médical. Consultez toujours un médecin pour tout problème de santé."
+              : 'This app is a health aid tool, not a replacement for professional medical advice. Always consult a doctor for any health concern.'}
+          </p>
+        </div>
+
         {/* Footer */}
         <p className="text-[10px] text-gray-400 pb-4">
           By continuing, you agree to our Terms of Service and Privacy Policy

@@ -8,6 +8,7 @@ const translations = {
     appName: 'AlleNest',
     appTagline: "Nature's Gentle Embrace",
     appSignature: 'Because every cry of your child has a cause',
+    medicalDisclaimer: 'This app is a health aid tool, not a replacement for professional medical advice. Always consult a doctor for any health concern.',
     appDescription:
       'Your trusted companion for child health and safety. Manage allergies, track growth, and receive personalized insights powered by AI.',
 
@@ -237,6 +238,7 @@ const translations = {
     appName: 'AlleNest',
     appTagline: "L'Étreinte Douce de la Nature",
     appSignature: 'Parce que chaque pleur de votre enfant a une cause',
+    medicalDisclaimer: "Cette application est une aide, pas un remplacement d'un avis médical. Consultez toujours un médecin pour tout problème de santé.",
     appDescription:
       'Votre compagnon de confiance pour la santé et la sécurité de votre enfant. Gérez les allergies, suivez la croissance et recevez des conseils personnalisés par IA.',
 
@@ -468,6 +470,7 @@ const translations = {
     appName: 'AlleNest',
     appTagline: 'احتضان الطبيعة اللطيف',
     appSignature: 'لأن كل بكاء طفلك له سبب',
+    medicalDisclaimer: 'هذا التطبيق أداة مساعدة وليس بديلاً عن الاستشارة الطبية المتخصصة. استشر دائماً طبيباً لأي مشكلة صحية.',
     appDescription:
       'رفيقك الموثوق لصحة وسلامة طفلك. إدارة الحساسية، تتبع النمو، والحصول على توصيات شخصية مدعومة بالذكاء الاصطناعي.',
 

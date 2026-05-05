@@ -140,15 +140,24 @@ export default function EmergencyPage() {
           </div>
         </Card>
 
-        {/* Important Note */}
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-          <p className="text-sm text-yellow-800">
-            <strong>⚠️</strong>{' '}
+        {/* Important Note – Disclaimer médical renforcé */}
+        <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-500 font-bold text-base">⚠️</span>
+            <p className="text-sm font-bold text-amber-800">
+              {t('language') === 'fr'
+                ? "Attention : application d'aide, pas de remplacement d'un avis médical"
+                : t('language') === 'ar'
+                ? 'تنبيه: هذا التطبيق أداة مساعدة وليس بديلاً عن الطبيب'
+                : 'Warning: this app is an aid tool, not a replacement for medical advice'}
+            </p>
+          </div>
+          <p className="text-xs text-amber-700 leading-relaxed">
             {t('language') === 'fr'
-              ? 'Appelez toujours les secours en premier. Ces instructions ne remplacent pas un avis médical professionnel.'
+              ? "Appelez toujours les secours en premier (14 – SAMU). Cette application est une aide, pas un remplacement d'un avis médical professionnel."
               : t('language') === 'ar'
-              ? 'اتصل دائماً بالطوارئ أولاً. هذه الإرشادات لا تحل محل المشورة الطبية المتخصصة.'
-              : 'Always call emergency services first. These are guidelines only and do not replace professional medical advice.'}
+              ? 'اتصل دائماً بالطوارئ أولاً. هذا التطبيق أداة مساعدة وليس بديلاً عن الاستشارة الطبية المتخصصة.'
+              : 'Always call emergency services first. This app is a health aid tool, not a replacement for professional medical advice.'}
           </p>
         </div>
       </div>
