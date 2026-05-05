@@ -189,3 +189,17 @@
 - [ ] Refonte EmergencyPage : header rouge vif, boutons d'urgence
 - [ ] Refonte Advice : header vert, articles avec images
 - [ ] 0 erreur TypeScript · tests passants
+
+## Phase 27 : Améliorations UI/UX ciblées
+
+- [x] Animation fade-in + effet flottant sur "مرحبا أمي / مرحبا أبي" dans ChildSelector
+- [x] Typographie moderne avec dégradé rose+bleu sur le texte de bienvenue
+- [x] Remplacer le sélecteur de date natif par un sélecteur custom (dropdowns mois/année) dans ChildProfileSetup
+- [x] Remplacer le sélecteur de date natif dans Appointments
+- [x] Remplacer le sélecteur de date natif dans Doctor.tsx et Growth.tsx
+- [x] Remplacer la couleur rouge des boutons actifs/clics par bleu clair (#ADD8E6) et rose clair (#FFC0CB)
+- [x] Persistance de langue dans localStorage + application globale dès la première utilisation
+- [x] Supprimer "الشرطة" (Police 17) de la liste des contacts d'urgence dans EmergencyPage
+- [x] Remplacer la mention adrénaline par "Donner uniquement le médicament prescrit par le médecin de l'enfant"
+- [x] @keyframes float + fadeInUp ajoutés dans index.css
+- [x] 0 erreur TypeScript · 21 tests passants

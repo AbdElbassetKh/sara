@@ -68,7 +68,6 @@ export const DOCUMENT_TYPES = [
 
 export const EMERGENCY_NUMBERS = {
   ambulance: '14',
-  police: '17',
   fire: '15',
 } as const;
 
@@ -98,7 +97,7 @@ export const FIRST_AID_STEPS = [
   },
   {
     title: 'Administer Treatment',
-    description: 'If you have an epinephrine auto-injector, use it. Otherwise, monitor vital signs.',
+    description: 'Give only the medication prescribed by your child\'s doctor. Do not administer any other medication without medical advice.',
   },
 ] as const;
 

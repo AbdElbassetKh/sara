@@ -1,5 +1,6 @@
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { useState } from 'react';
+import DatePicker from '@/components/DatePicker';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -162,10 +163,12 @@ export default function Doctor() {
                   onChange={(e) => handleInputChange('specialty', e.target.value)}
                 />
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="date" className="text-sm font-semibold">{t('visitDate')}</Label>
-                <Input id="date" type="date" value={formData.date} onChange={(e) => handleInputChange('date', e.target.value)} />
-              </div>
+              <DatePicker
+                label={t('visitDate')}
+                value={formData.date}
+                onChange={(v) => handleInputChange('date', v)}
+                maxYear={new Date().getFullYear() + 1}
+              />
               <div className="space-y-1.5">
                 <Label htmlFor="notes" className="text-sm font-semibold">{t('notes')}</Label>
                 <textarea

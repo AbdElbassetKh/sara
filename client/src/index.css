@@ -76,7 +76,8 @@
   /* Border & Input */
   --border: oklch(0.88 0.01 220);
   --input: oklch(0.88 0.01 220);
-  --ring: oklch(0.72 0.22 210);
+  /* Ring: bleu clair #ADD8E6 — jamais rouge */
+  --ring: oklch(0.85 0.08 215);
 
   /* Radius */
   --radius: 0.85rem;
@@ -335,9 +336,24 @@
     @apply text-xs font-semibold text-primary;
   }
 
-  /* Input vivid focus */
+  /* Input vivid focus — bleu clair / rose (pas rouge) */
   input:focus, textarea:focus, select:focus {
-    @apply outline-none ring-2 ring-primary/40 border-primary;
+    @apply outline-none ring-2 border-sky-400;
+    ring-color: rgba(173, 216, 230, 0.6);
+    box-shadow: 0 0 0 3px rgba(173, 216, 230, 0.35);
+  }
+
+  /* Boutons actifs : bleu clair ou rose, jamais rouge */
+  button:active:not(.btn-danger):not([data-variant="destructive"]) {
+    @apply scale-95;
+    filter: brightness(0.92);
+  }
+
+  /* Focus visible : anneau bleu clair */
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(173, 216, 230, 0.55);
+    border-radius: 0.5rem;
   }
 
   /* Page header gradient */
@@ -390,4 +406,29 @@ html[lang="en"],
 html[lang="fr"] {
   direction: ltr;
   font-family: 'Poppins', sans-serif;
+}
+
+/* ===== Animations ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease forwards;
 }

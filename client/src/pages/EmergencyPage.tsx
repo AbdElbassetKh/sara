@@ -38,7 +38,7 @@ export default function EmergencyPage() {
     {
       emoji: '💉',
       title: isAr ? 'أعطِ العلاج' : isFr ? 'Administrez le traitement' : 'Administer Treatment',
-      desc: isAr ? 'إذا كان لديك حقنة أدرينالين تلقائية، استخدمها. وإلا، راقب العلامات الحيوية.' : isFr ? "Si vous avez un auto-injecteur d'épinéphrine, utilisez-le. Sinon, surveillez les signes vitaux." : 'If you have an epinephrine auto-injector, use it. Otherwise, monitor vital signs.',
+      desc: isAr ? 'أعطِ طفلك الدواء الذي وصفه الطبيب فقط. لا تعطِ أي دواء آخر دون استشارة طبية.' : isFr ? 'Donnez uniquement le médicament prescrit par le médecin de votre enfant. Ne donnez aucun autre médicament sans avis médical.' : 'Give only the medication prescribed by your child\'s doctor. Do not administer any other medication without medical advice.',
     },
   ];
 
@@ -49,13 +49,6 @@ export default function EmergencyPage() {
       gradient: 'linear-gradient(135deg, #EF9A9A, #E53935)',
       shadow: 'rgba(229,57,53,0.5)',
       emoji: '🚑',
-    },
-    {
-      label: t('callPolice'),
-      number: EMERGENCY_NUMBERS.police,
-      gradient: 'linear-gradient(135deg, #90CAF9, #1565C0)',
-      shadow: 'rgba(21,101,192,0.45)',
-      emoji: '🚓',
     },
     {
       label: t('callFirefighters'),

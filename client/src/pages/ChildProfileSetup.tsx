@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DatePicker from '@/components/DatePicker';
 import { trpc } from '@/lib/trpc';
 import { useAppContext } from '@/contexts/AppContext';
 import { toast } from 'sonner';
@@ -226,16 +227,12 @@ export default function ChildProfileSetup() {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="birthDate" className="text-sm font-semibold">{t('birthDate')} *</Label>
-              <Input
-                id="birthDate"
-                type="date"
-                value={formData.birthDate}
-                onChange={(e) => handleInputChange('birthDate', e.target.value)}
-                required
-              />
-            </div>
+            <DatePicker
+              label={`${t('birthDate')} *`}
+              value={formData.birthDate}
+              onChange={(v) => handleInputChange('birthDate', v)}
+              maxYear={new Date().getFullYear()}
+            />
 
             <div className="space-y-1.5">
               <Label htmlFor="gender" className="text-sm font-semibold">{t('gender')} *</Label>

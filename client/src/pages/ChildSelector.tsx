@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -50,6 +50,12 @@ export default function ChildSelector() {
   const { language } = useLanguage();
   const { setSelectedChild, setChildren } = useAppContext();
   const [, setLocation] = useLocation();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setVisible(true), 80);
+    return () => clearTimeout(t);
+  }, []);
 
   const { data: childrenData = [], isLoading } = trpc.children.list.useQuery();
 
@@ -122,8 +128,23 @@ export default function ChildSelector() {
           />
           <div className="space-y-0.5 mb-1">
             {greeting.map((g, i) => (
-              <p key={i} className={`font-extrabold text-white leading-tight ${i === 0 ? 'text-2xl' : 'text-xl opacity-90'}`}
-                style={{ fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}>
+              <p
+                key={i}
+                className={`font-extrabold leading-tight ${i === 0 ? 'text-2xl' : 'text-xl'}`}
+                style={{
+                  fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif",
+                  background: i === 0
+                    ? 'linear-gradient(90deg, #ffffff 0%, #FCE4EC 60%, #E1F5FE 100%)'
+                    : 'linear-gradient(90deg, #E1F5FE 0%, #ffffff 60%, #FCE4EC 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? 'translateY(0)' : 'translateY(16px)',
+                  transition: `opacity 0.6s ease ${i * 0.15}s, transform 0.6s ease ${i * 0.15}s`,
+                  animation: visible ? `float 3s ease-in-out ${i * 0.3}s infinite` : 'none',
+                }}
+              >
                 {g}
               </p>
             ))}

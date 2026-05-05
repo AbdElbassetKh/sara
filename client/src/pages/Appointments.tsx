@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import PageHeader from '@/components/PageHeader';
+import DatePicker from '@/components/DatePicker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -273,15 +274,12 @@ export default function Appointments() {
                 {/* Date & Time */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                      {language === 'fr' ? 'Date *' : language === 'ar' ? 'التاريخ *' : 'Date *'}
-                    </Label>
-                    <Input
-                      type="date"
+                    <DatePicker
+                      label={language === 'fr' ? 'Date *' : language === 'ar' ? 'التاريخ *' : 'Date *'}
                       value={form.appointmentDate}
-                      onChange={(e) => setForm({ ...form, appointmentDate: e.target.value })}
-                      min={new Date().toISOString().split('T')[0]}
-                      className="mt-1"
+                      onChange={(v) => setForm({ ...form, appointmentDate: v })}
+                      minYear={new Date().getFullYear()}
+                      maxYear={new Date().getFullYear() + 5}
                     />
                   </div>
                   <div>

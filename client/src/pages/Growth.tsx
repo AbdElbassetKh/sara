@@ -1,5 +1,6 @@
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { useState } from 'react';
+import DatePicker from '@/components/DatePicker';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,10 +130,12 @@ export default function Growth() {
           <Card className="p-5 space-y-4 shadow-sm">
             <h2 className="text-base font-semibold text-foreground">{t('addMeasurement')}</h2>
             <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="date" className="text-sm font-medium">{t('date')}</Label>
-                <Input id="date" type="date" value={formData.date} onChange={(e) => handleInputChange('date', e.target.value)} />
-              </div>
+              <DatePicker
+                label={t('date')}
+                value={formData.date}
+                onChange={(v) => handleInputChange('date', v)}
+                maxYear={new Date().getFullYear()}
+              />
               <div className="space-y-1.5">
                 <Label htmlFor="weight" className="text-sm font-medium">{t('weight')}</Label>
                 <Input id="weight" type="number" step="0.1" placeholder="6.8" value={formData.weight} onChange={(e) => handleInputChange('weight', e.target.value)} />
