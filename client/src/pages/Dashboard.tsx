@@ -52,7 +52,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-3">
               <img src={LOGO_URL} alt="AlleNest" className="w-11 h-11 rounded-full object-cover shadow-md border-2 border-white/60" />
               <div>
-                <p className="text-white/80 text-xs font-medium">AlleNest · Child Safety AI</p>
+                <p className="text-white/80 text-xs font-medium">AlleNest</p>
                 <h1 className="text-white text-lg font-bold leading-tight">
                   {greeting}, {user?.name?.split(' ')[0] || 'Parent'} 👋
                 </h1>

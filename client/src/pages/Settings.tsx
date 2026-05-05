@@ -38,7 +38,7 @@ export default function Settings() {
         <img src={LOGO_URL} alt="AlleNest" className="w-10 h-10 object-contain rounded-full" />
         <div>
           <h1 className="text-base font-bold text-foreground leading-tight">AlleNest</h1>
-          <p className="text-[10px] text-muted-foreground leading-tight">Child Safety AI</p>
+
         </div>
       </div>
 
@@ -203,7 +203,7 @@ export default function Settings() {
           <div className="flex items-center gap-3">
             <img src={LOGO_URL} alt="AlleNest" className="w-12 h-12 object-contain rounded-xl" />
             <div>
-              <p className="text-sm font-bold text-foreground">AlleNest – Child Safety AI</p>
+              <p className="text-sm font-bold text-foreground">AlleNest</p>
               <p className="text-xs text-muted-foreground">{t('version')} 1.0.0 · Build 2026.05.05</p>
             </div>
           </div>

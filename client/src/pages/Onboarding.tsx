@@ -43,7 +43,7 @@ export default function Onboarding() {
         {/* Signature */}
         <div className="space-y-2 px-2">
           <h2 className="text-xl font-bold text-gray-800">
-            Child Safety AI
+            AlleNest
           </h2>
           {/* Signature officielle */}
           <div className="relative">
