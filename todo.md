@@ -215,3 +215,12 @@
 - [x] Afficher la bannière d'allergène dynamique (vert si aucune alerte, rouge si alerte détectée)
 - [x] Mettre à jour Timeline.tsx : chargement réel, filtres (Tout/Repas/Symptômes/Médecin), suppression avec confirmation
 - [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 29 : IA Insights — Corrélations + GPT-4o-mini
+
+- [x] Procédure tRPC `insights.detectCorrelations` : règle simple (même aliment + même symptôme ≥ 3 fois dans 4h)
+- [x] Procédure tRPC `insights.analyzeWithAI` : appel LLM intégré (GPT-4o-mini), retourne riskLevel / suspectFood+confidence / mainSymptoms / advice (AR/FR/EN)
+- [x] Mettre à jour la page Insights.tsx avec affichage des résultats IA (couleurs #4FC3F7 / #F8BBD0 / #EF5350)
+- [x] Ajouter bannière de corrélation dans Dashboard.tsx (si ≥ 1 corrélation détectée, cliquable vers /insights)
+- [x] 0 erreur TypeScript · 21 tests passants
+- [x] Guide d'installation rédigé et livré à l'utilisateur

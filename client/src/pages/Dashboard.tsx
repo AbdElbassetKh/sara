@@ -125,6 +125,11 @@ export default function Dashboard() {
     { enabled: childId > 0, retry: false, refetchOnWindowFocus: false }
   );
 
+  const { data: correlations = [] } = trpc.insights.detectCorrelations.useQuery(
+    { childId },
+    { enabled: childId > 0, retry: false, refetchOnWindowFocus: false }
+  );
+
   const QUICK_ACTIONS = [
     {
       icon: Apple, label: t('actionTrackMeal'), path: '/meals',
@@ -288,6 +293,32 @@ export default function Dashboard() {
             </div>
           </div>
         ) : null}
+
+        {/* ── Correlation banner ── */}
+        {childId > 0 && correlations.length > 0 && (
+          <div
+            className="flex items-start gap-3 p-4 rounded-3xl cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, #FFF8E1, #FFE082)', border: '1.5px solid #FFE082', boxShadow: '0 4px 16px rgba(255,167,38,0.18)' }}
+            onClick={() => setLocation('/insights')}
+          >
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #FFD54F, #FF8F00)', boxShadow: '0 4px 12px rgba(255,167,38,0.4)' }}>
+              <span className="text-white text-lg">🔗</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-amber-800">
+                {isAr ? `تم اكتشاف ${correlations.length} ارتباط طعام ↔ أعراض` : isFr ? `${correlations.length} corrélation${correlations.length > 1 ? 's' : ''} aliment ↔ symptôme détectée${correlations.length > 1 ? 's' : ''}` : `${correlations.length} food ↔ symptom correlation${correlations.length > 1 ? 's' : ''} detected`}
+              </p>
+              <p className="text-xs text-amber-700 mt-0.5 truncate">
+                {isAr
+                  ? `أبرزها: ${correlations[0].food} → ${correlations[0].symptom} (${correlations[0].count}×)`
+                  : isFr
+                  ? `Principal : ${correlations[0].food} → ${correlations[0].symptom} (${correlations[0].count}×)`
+                  : `Top: ${correlations[0].food} → ${correlations[0].symptom} (${correlations[0].count}×)`}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-amber-500 flex-shrink-0 mt-1" />
+          </div>
+        )}
 
         {/* ── Stats Row ── */}
         <div className="grid grid-cols-2 gap-3">
