@@ -176,3 +176,16 @@
 - [x] Refonte Dashboard : header gradient arrondi, cartes arrondies, quick actions avec gradients
 - [x] Refonte ChildSelector : avatars emoji, cartes douces, boutons colorés
 - [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 26 : Professionnalisation automatique
+- [ ] Composant PageHeader réutilisable (gradient + titre + back button)
+- [ ] Refonte Onboarding : illustration, sélecteur langue visuel, bouton CTA
+- [ ] Refonte Settings : sections avec icônes colorées, toggles stylisés
+- [ ] Refonte ChildProfileSetup : formulaire avec champs stylisés
+- [ ] Refonte Symptoms : header rose, sévérité slider coloré
+- [ ] Refonte Meals : header bleu, liste ingrédients avec badges
+- [ ] Refonte Insights : header violet, graphiques, recommandations IA
+- [ ] Refonte Appointments : header cyan, liste RDV avec statuts
+- [ ] Refonte EmergencyPage : header rouge vif, boutons d'urgence
+- [ ] Refonte Advice : header vert, articles avec images
+- [ ] 0 erreur TypeScript · tests passants

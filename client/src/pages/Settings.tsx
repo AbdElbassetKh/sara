@@ -1,12 +1,8 @@
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@/const';
-import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, Users, ChevronRight, Baby } from 'lucide-react';
+import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, ChevronRight, Baby, Settings as SettingsIcon } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useLocation } from 'wouter';
 import { ChildPhotoEditor } from '@/components/ChildPhotoEditor';
@@ -20,6 +16,9 @@ export default function Settings() {
   const [dataSharing, setDataSharing] = useState(false);
   const [, setLocation] = useLocation();
 
+  const isAr = language === 'ar';
+  const isFr = language === 'fr';
+
   const logoutMutation = trpc.auth.logout.useMutation({
     onSuccess: () => {
       setLocation('/');
@@ -27,220 +26,230 @@ export default function Settings() {
     },
   });
 
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
+  const LANG_FLAGS: Record<string, string> = { ar: '🇩🇿', fr: '🇫🇷', en: '🇬🇧' };
+
+  const MENU_ITEMS = [
+    {
+      icon: Crown,
+      label: isAr ? 'AlleNest المميز' : isFr ? 'AlleNest Premium' : 'AlleNest Premium',
+      sub: isAr ? 'افتح جميع الميزات' : isFr ? 'Débloquez toutes les fonctionnalités' : 'Unlock all features',
+      gradient: 'linear-gradient(135deg, #FFD54F, #FF8F00)',
+      shadow: 'rgba(255,213,79,0.4)',
+      path: '/premium',
+    },
+    {
+      icon: Sun,
+      label: isAr ? 'التسجيل اليومي' : isFr ? 'Bilan quotidien' : 'Daily Check-in',
+      sub: isAr ? 'التتبع يوما بيوم' : isFr ? 'Suivi jour par jour' : 'Day-by-day tracking',
+      gradient: 'linear-gradient(135deg, #A5D6A7, #388E3C)',
+      shadow: 'rgba(165,214,167,0.4)',
+      path: '/daily-checkin',
+    },
+    {
+      icon: FileText,
+      label: isAr ? 'تصدير تقرير' : isFr ? 'Exporter un rapport' : 'Export Report',
+      sub: isAr ? 'تنزيل بيانات الصحة' : isFr ? 'Télécharger les données de santé' : 'Download health data',
+      gradient: 'linear-gradient(135deg, #90CAF9, #1565C0)',
+      shadow: 'rgba(144,202,249,0.4)',
+      path: '/export',
+    },
+    {
+      icon: Star,
+      label: isAr ? 'تقييم التطبيق' : isFr ? "Évaluer l'application" : 'Rate the App',
+      sub: isAr ? 'أعطِ رأيك' : isFr ? 'Donnez votre avis' : 'Share your feedback',
+      gradient: 'linear-gradient(135deg, #FFCC80, #E65100)',
+      shadow: 'rgba(255,204,128,0.4)',
+      path: '/rate',
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      {/* Header with Logo */}
-      <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 max-w-md mx-auto">
-        <img src={LOGO_URL} alt="AlleNest" className="w-10 h-10 object-contain rounded-full" />
-        <div>
-          <h1 className="text-base font-bold text-foreground leading-tight">AlleNest</h1>
+    <div
+      className="min-h-screen pb-24"
+      style={{ background: '#F9FAFB', fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+    >
+      {/* Header */}
+      <div
+        className="relative overflow-hidden px-4 pt-10 pb-7"
+        style={{
+          background: 'linear-gradient(135deg, #9FA8DA 0%, #5C6BC0 60%, #7986CB 100%)',
+          borderBottomLeftRadius: '32px',
+          borderBottomRightRadius: '32px',
+          boxShadow: '0 8px 32px rgba(92,107,192,0.35)',
+        }}
+      >
+        <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-15 pointer-events-none" style={{ background: 'white', transform: 'translate(40%, -40%)' }} />
+        <div className="absolute bottom-0 left-0 w-28 h-28 rounded-full opacity-10 pointer-events-none" style={{ background: 'white', transform: 'translate(-30%, 40%)' }} />
 
+        <div className="relative z-10 max-w-md mx-auto flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-white/25 flex items-center justify-center flex-shrink-0" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+            <SettingsIcon size={28} color="white" />
+          </div>
+          <div>
+            <h1 className="text-white text-xl font-extrabold leading-tight">{t('settings')}</h1>
+            <p className="text-white/75 text-xs mt-0.5">
+              {isAr ? 'إدارة حسابك وتفضيلاتك' : isFr ? 'Gérez votre compte et préférences' : 'Manage your account & preferences'}
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 space-y-5">
-        {/* Page Title */}
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">{t('settings')}</h2>
-        </div>
+      <div className="max-w-md mx-auto px-4 mt-4 space-y-4">
 
-        {/* Children Profiles – Photo */}
+        {/* Children Profiles */}
         <ChildrenProfileSection language={language} />
 
-        {/* Language Settings */}
-        <Card className="p-5 space-y-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Globe size={18} className="text-primary" />
-            <h3 className="text-base font-semibold text-foreground">{t('language')}</h3>
+        {/* Language */}
+        <div
+          className="p-5 rounded-3xl bg-white"
+          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #4FC3F7, #0288D1)', boxShadow: '0 4px 12px rgba(79,195,247,0.4)' }}>
+              <Globe size={18} color="white" />
+            </div>
+            <p className="text-sm font-extrabold text-gray-800">{t('language')}</p>
           </div>
-          <Select
-            value={language}
-            onValueChange={(value) => setLanguage(value as typeof SUPPORTED_LANGUAGES[number])}
-          >
-            <SelectTrigger className="h-11">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {SUPPORTED_LANGUAGES.map((lang) => (
-                <SelectItem key={lang} value={lang}>
-                  {LANGUAGE_NAMES[lang]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Card>
+          <div className="space-y-2">
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <button
+                key={lang}
+                onClick={() => setLanguage(lang)}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl transition-all active:scale-[0.97]"
+                style={{
+                  background: language === lang ? 'linear-gradient(135deg, #E3F2FD, #BBDEFB)' : '#F9FAFB',
+                  border: `2px solid ${language === lang ? '#90CAF9' : '#F1F5F9'}`,
+                }}
+              >
+                <span style={{ fontSize: 22 }}>{LANG_FLAGS[lang]}</span>
+                <span className="text-sm font-bold text-gray-700 flex-1 text-start">{LANGUAGE_NAMES[lang]}</span>
+                {language === lang && (
+                  <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                    <span className="text-white text-[10px] font-bold">✓</span>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {/* Notifications Settings */}
-        <Card className="p-5 space-y-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Bell size={18} className="text-secondary" />
-            <h3 className="text-base font-semibold text-foreground">{t('notifications')}</h3>
+        {/* Notifications */}
+        <div
+          className="p-5 rounded-3xl bg-white"
+          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F48FB1, #E91E8C)', boxShadow: '0 4px 12px rgba(244,143,177,0.4)' }}>
+              <Bell size={18} color="white" />
+            </div>
+            <p className="text-sm font-extrabold text-gray-800">{t('notifications')}</p>
           </div>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="notifications" className="text-sm font-medium cursor-pointer">
-                {t('pushNotifications')}
-              </Label>
-              <Switch
-                id="notifications"
-                checked={notifications}
-                onCheckedChange={setNotifications}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="email-alerts" className="text-sm font-medium cursor-pointer">
-                {t('emailAlerts')}
-              </Label>
-              <Switch
-                id="email-alerts"
-                checked={emailAlerts}
-                onCheckedChange={setEmailAlerts}
-              />
-            </div>
+            {[
+              { id: 'push', label: t('pushNotifications'), value: notifications, onChange: setNotifications },
+              { id: 'email', label: t('emailAlerts'), value: emailAlerts, onChange: setEmailAlerts },
+            ].map((item) => (
+              <div key={item.id} className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-gray-700">{item.label}</span>
+                <Switch checked={item.value} onCheckedChange={item.onChange} />
+              </div>
+            ))}
           </div>
-        </Card>
+        </div>
 
-        {/* Privacy Settings */}
-        <Card className="p-5 space-y-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Lock size={18} className="text-orange-600" />
-            <h3 className="text-base font-semibold text-foreground">{t('privacy')}</h3>
+        {/* Privacy */}
+        <div
+          className="p-5 rounded-3xl bg-white"
+          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #FFCC80, #E65100)', boxShadow: '0 4px 12px rgba(255,204,128,0.4)' }}>
+              <Lock size={18} color="white" />
+            </div>
+            <p className="text-sm font-extrabold text-gray-800">{t('privacy')}</p>
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="data-sharing" className="text-sm font-medium cursor-pointer">
-              {t('dataSharing')}
-            </Label>
-            <Switch
-              id="data-sharing"
-              checked={dataSharing}
-              onCheckedChange={setDataSharing}
-            />
+            <span className="text-sm font-semibold text-gray-700">{t('dataSharing')}</span>
+            <Switch checked={dataSharing} onCheckedChange={setDataSharing} />
           </div>
-        </Card>
+        </div>
 
-        {/* Premium */}
-        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/premium')}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
-              <Crown size={18} className="text-yellow-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                {language === 'fr' ? 'AlleNest Premium' : language === 'ar' ? 'AlleNest المميز' : 'AlleNest Premium'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {language === 'fr' ? 'Débloquez toutes les fonctionnalités' : language === 'ar' ? 'افتح جميع الميزات' : 'Unlock all features'}
-              </p>
-            </div>
-            <ChevronRight size={16} className="text-muted-foreground" />
-          </div>
-        </Card>
+        {/* Menu items */}
+        <div className="space-y-3">
+          {MENU_ITEMS.map((item) => (
+            <button
+              key={item.path}
+              onClick={() => setLocation(item.path)}
+              className="w-full flex items-center gap-4 p-4 rounded-3xl bg-white transition-all active:scale-[0.97]"
+              style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+            >
+              <div
+                className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: item.gradient, boxShadow: `0 4px 12px ${item.shadow}` }}
+              >
+                <item.icon size={20} color="white" />
+              </div>
+              <div className="flex-1 text-start">
+                <p className="text-sm font-bold text-gray-800">{item.label}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{item.sub}</p>
+              </div>
+              <ChevronRight size={18} className="text-gray-300" />
+            </button>
+          ))}
+        </div>
 
-        {/* Daily Check-in */}
-        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/daily-checkin')}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-              <Sun size={18} className="text-green-600" />
+        {/* About */}
+        <div
+          className="p-5 rounded-3xl bg-white"
+          style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #80DEEA, #00838F)', boxShadow: '0 4px 12px rgba(128,222,234,0.4)' }}>
+              <Info size={18} color="white" />
             </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                {language === 'fr' ? 'Bilan quotidien' : language === 'ar' ? 'التسجيل اليومي' : 'Daily Check-in'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {language === 'fr' ? 'Suivi jour par jour' : language === 'ar' ? 'التتبع يوما بيوم' : 'Day-by-day tracking'}
-              </p>
-            </div>
-            <ChevronRight size={16} className="text-muted-foreground" />
+            <p className="text-sm font-extrabold text-gray-800">{t('about')}</p>
           </div>
-        </Card>
-
-        {/* Export Report */}
-        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/export')}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <FileText size={18} className="text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                {language === 'fr' ? 'Exporter un rapport' : language === 'ar' ? 'تصدير تقرير' : 'Export Report'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {language === 'fr' ? 'Télécharger les données de santé' : language === 'ar' ? 'تنزيل بيانات الصحة' : 'Download health data'}
-              </p>
-            </div>
-            <ChevronRight size={16} className="text-muted-foreground" />
-          </div>
-        </Card>
-
-        {/* Rate App */}
-        <Card className="p-4 shadow-sm cursor-pointer hover:bg-muted/30 transition-colors" onClick={() => setLocation('/rate')}>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-              <Star size={18} className="text-orange-500" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-foreground">
-                {language === 'fr' ? 'Évaluer l\'application' : language === 'ar' ? 'تقييم التطبيق' : 'Rate the App'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {language === 'fr' ? 'Donnez votre avis' : language === 'ar' ? 'أعطِ رأيك' : 'Share your feedback'}
-              </p>
-            </div>
-            <ChevronRight size={16} className="text-muted-foreground" />
-          </div>
-        </Card>
-
-        {/* About Section */}
-        <Card className="p-5 space-y-3 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Info size={18} className="text-blue-500" />
-            <h3 className="text-base font-semibold text-foreground">{t('about')}</h3>
-          </div>
-          <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="AlleNest" className="w-12 h-12 object-contain rounded-xl" />
+          <div className="flex items-center gap-3 mb-4">
+            <img src={LOGO_URL} alt="AlleNest" className="w-14 h-14 object-cover rounded-2xl" style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }} />
             <div>
-              <p className="text-sm font-bold text-foreground">AlleNest</p>
-              <p className="text-xs text-muted-foreground">{t('version')} 1.0.0 · Build 2026.05.05</p>
+              <p className="text-sm font-extrabold text-gray-800">AlleNest</p>
+              <p className="text-xs text-gray-400">{t('version')} 1.0.0 · Build 2026.05</p>
             </div>
           </div>
-          {/* Signature officielle */}
-          <div className="bg-gradient-to-r from-sky-50 to-pink-50 border border-sky-100 rounded-xl px-4 py-3 text-center">
-            <p className="text-xs font-semibold italic text-transparent bg-clip-text bg-gradient-to-r from-sky-600 to-pink-600">
-              ✨ {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'} ✨
+          <div
+            className="px-4 py-3 rounded-2xl text-center"
+            style={{ background: 'linear-gradient(135deg, #E3F2FD, #FCE4EC)', border: '1px solid #BBDEFB' }}
+          >
+            <p className="text-xs font-bold italic" style={{ background: 'linear-gradient(135deg, #0288D1, #E91E8C)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              ✨ {isAr ? 'لأن كل بكاء طفلك له سبب' : isFr ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'} ✨
             </p>
           </div>
-        </Card>
+        </div>
 
-        {/* Logout Button */}
-        <Button
-          onClick={handleLogout}
-          variant="outline"
+        {/* Logout */}
+        <button
+          onClick={() => logoutMutation.mutate()}
           disabled={logoutMutation.isPending}
-          className="w-full h-12 text-base font-medium gap-2 border-red-200 text-red-600 hover:bg-red-50"
+          className="w-full h-14 font-extrabold text-base rounded-3xl flex items-center justify-center gap-3 transition-all active:scale-[0.97] disabled:opacity-50"
+          style={{
+            background: 'linear-gradient(135deg, #FFCDD2, #EF9A9A)',
+            border: '2px solid #FFCDD2',
+            color: '#C62828',
+            boxShadow: '0 4px 16px rgba(239,154,154,0.4)',
+          }}
         >
-          <LogOut size={18} />
+          <LogOut size={20} />
           {logoutMutation.isPending ? t('loading') : t('logout')}
-        </Button>
+        </button>
 
         {/* Footer */}
-        <div className="text-center space-y-2 text-xs text-muted-foreground pb-4">
-          <p className="font-medium italic text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-pink-500 text-[11px]">
-            {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'}
-          </p>
+        <div className="text-center space-y-2 text-xs text-gray-400 pb-4">
           <p>© 2026 AlleNest. All rights reserved.</p>
           <div className="flex justify-center gap-4 flex-wrap">
-            <button onClick={() => setLocation('/legal/privacy')} className="hover:text-foreground transition-colors">
-              {t('privacyPolicy')}
-            </button>
-            <button onClick={() => setLocation('/legal/terms')} className="hover:text-foreground transition-colors">
-              {t('termsOfService')}
-            </button>
-            <button onClick={() => setLocation('/legal/partners')} className="hover:text-foreground transition-colors">
-              {language === 'fr' ? 'Partenaires' : language === 'ar' ? 'الشركاء' : 'Partners'}
+            <button onClick={() => setLocation('/legal/privacy')} className="hover:text-gray-600 transition-colors">{t('privacyPolicy')}</button>
+            <button onClick={() => setLocation('/legal/terms')} className="hover:text-gray-600 transition-colors">{t('termsOfService')}</button>
+            <button onClick={() => setLocation('/legal/partners')} className="hover:text-gray-600 transition-colors">
+              {isAr ? 'الشركاء' : isFr ? 'Partenaires' : 'Partners'}
             </button>
           </div>
         </div>
@@ -251,7 +260,7 @@ export default function Settings() {
 
 // ─── Sub-component: Children profile photo section ───────────────────────────
 function ChildrenProfileSection({ language }: { language: string }) {
-  const t = (fr: string, ar: string, en: string) =>
+  const lbl = (fr: string, ar: string, en: string) =>
     language === 'fr' ? fr : language === 'ar' ? ar : en;
 
   const { data: children, isLoading } = trpc.children.list.useQuery(undefined, {
@@ -261,71 +270,77 @@ function ChildrenProfileSection({ language }: { language: string }) {
 
   if (isLoading) {
     return (
-      <Card className="p-5 shadow-sm">
-        <div className="flex items-center gap-2 mb-4">
-          <Baby size={18} className="text-pink-500" />
-          <h3 className="text-base font-semibold text-foreground">
-            {t('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}
-          </h3>
+      <div
+        className="p-5 rounded-3xl bg-white"
+        style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-2xl bg-pink-100 flex items-center justify-center">
+            <Baby size={18} className="text-pink-500" />
+          </div>
+          <p className="text-sm font-extrabold text-gray-800">{lbl('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}</p>
         </div>
         <div className="space-y-3">
           {[1, 2].map((i) => (
             <div key={i} className="flex items-center gap-4 animate-pulse">
-              <div className="w-16 h-16 rounded-2xl bg-muted flex-shrink-0" />
+              <div className="w-16 h-16 rounded-2xl bg-gray-100 flex-shrink-0" />
               <div className="flex-1 space-y-2">
-                <div className="h-4 bg-muted rounded w-1/2" />
-                <div className="h-3 bg-muted rounded w-1/3" />
-                <div className="h-7 bg-muted rounded w-28" />
+                <div className="h-4 bg-gray-100 rounded w-1/2" />
+                <div className="h-3 bg-gray-100 rounded w-1/3" />
               </div>
             </div>
           ))}
         </div>
-      </Card>
+      </div>
     );
   }
 
   if (!children || children.length === 0) {
     return (
-      <Card className="p-5 shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <Baby size={18} className="text-pink-500" />
-          <h3 className="text-base font-semibold text-foreground">
-            {t('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}
-          </h3>
+      <div
+        className="p-5 rounded-3xl bg-white"
+        style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+      >
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F48FB1, #E91E8C)', boxShadow: '0 4px 12px rgba(244,143,177,0.4)' }}>
+            <Baby size={18} color="white" />
+          </div>
+          <p className="text-sm font-extrabold text-gray-800">{lbl('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}</p>
         </div>
-        <p className="text-sm text-muted-foreground text-center py-4">
-          {t(
-            'Aucun profil enfant créé. Ajoutez un enfant depuis le tableau de bord.',
+        <p className="text-sm text-gray-400 text-center py-4">
+          {lbl(
+            'Aucun profil enfant. Ajoutez un enfant depuis le tableau de bord.',
             'لا يوجد ملف طفل. أضف طفلاً من لوحة التحكم.',
             'No child profile yet. Add a child from the dashboard.',
           )}
         </p>
-      </Card>
+      </div>
     );
   }
 
   return (
-    <Card className="p-5 shadow-sm space-y-4">
-      <div className="flex items-center gap-2">
-        <Baby size={18} className="text-pink-500" />
-        <h3 className="text-base font-semibold text-foreground">
-          {t('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}
-        </h3>
+    <div
+      className="p-5 rounded-3xl bg-white"
+      style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}
+    >
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-9 h-9 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #F48FB1, #E91E8C)', boxShadow: '0 4px 12px rgba(244,143,177,0.4)' }}>
+          <Baby size={18} color="white" />
+        </div>
+        <p className="text-sm font-extrabold text-gray-800">{lbl('Profils enfants', 'ملفات الأطفال', 'Children Profiles')}</p>
       </div>
-      <p className="text-xs text-muted-foreground -mt-2">
-        {t(
-          'Appuyez sur la caméra ou le bouton pour changer la photo de profil.',
-          'اضغط على الكاميرا أو الزر لتغيير صورة الملف الشخصي.',
-          'Tap the camera icon or button to change the profile photo.',
+      <p className="text-xs text-gray-400 mb-4">
+        {lbl(
+          'Appuyez sur la caméra pour changer la photo de profil.',
+          'اضغط على الكاميرا لتغيير صورة الملف الشخصي.',
+          'Tap the camera icon to change the profile photo.',
         )}
       </p>
-      <div className="divide-y divide-border">
-        {children.map((child, idx) => (
-          <div key={child.id} className={idx > 0 ? 'pt-4' : ''}>
-            <ChildPhotoEditor child={child} />
-          </div>
+      <div className="space-y-4">
+        {children.map((child) => (
+          <ChildPhotoEditor key={child.id} child={child} />
         ))}
       </div>
-    </Card>
+    </div>
   );
 }

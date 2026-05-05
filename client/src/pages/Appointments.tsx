@@ -1,18 +1,17 @@
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAppContext } from '@/contexts/AppContext';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import {
-  Calendar, Clock, MapPin, User, Plus, ChevronLeft,
+  Calendar, Clock, MapPin, Plus,
   CheckCircle2, XCircle, Bell, BellOff, Stethoscope,
-  Trash2, Edit3, AlertCircle
+  Trash2, AlertCircle, X
 } from 'lucide-react';
 import { useLocation } from 'wouter';
+import PageHeader from '@/components/PageHeader';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 type AppointmentStatus = 'upcoming' | 'completed' | 'cancelled';
 
@@ -174,29 +173,31 @@ export default function Appointments() {
     );
   }
 
+  const isAr = language === 'ar';
+  const isFr = language === 'fr';
+
   return (
-    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
+    <div
+      className="min-h-screen pb-24"
+      style={{ background: '#F9FAFB', fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+    >
       <div className="max-w-md mx-auto">
-        {/* Header */}
-        <div className="page-header-gradient px-4 pt-10 pb-6">
-          <div className="flex items-center gap-3 mb-2">
+        <PageHeader
+          title={isAr ? 'المواعيد الطبية' : isFr ? 'Rendez-vous' : 'Appointments'}
+          subtitle={`${selectedChild.name} · ${upcomingAppointments.length} ${isAr ? 'قادم' : isFr ? 'à venir' : 'upcoming'}`}
+          gradient="linear-gradient(135deg, #80CBC4 0%, #00695C 60%, #00897B 100%)"
+          shadowColor="rgba(0,105,92,0.35)"
+          icon={Stethoscope}
+          backPath="/"
+          rightAction={
             <button
-              onClick={() => setLocation('/')}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition-colors"
+              onClick={() => setShowForm(!showForm)}
+              className="w-9 h-9 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-sm"
             >
-              <ChevronLeft className="w-5 h-5 text-white" />
+              {showForm ? <X size={18} color="white" /> : <Plus size={18} color="white" />}
             </button>
-            <div>
-              <h1 className="text-2xl font-extrabold text-white">
-                {language === 'fr' ? 'Rendez-vous' : language === 'ar' ? 'المواعيد الطبية' : 'Appointments'}
-              </h1>
-              <p className="text-sm text-white/80">
-                {selectedChild.name} · {upcomingAppointments.length}{' '}
-                {language === 'fr' ? 'à venir' : language === 'ar' ? 'قادم' : 'upcoming'}
-              </p>
-            </div>
-          </div>
-        </div>
+          }
+        />
 
         <div className="p-4 space-y-4">
           {/* Medical disclaimer */}
@@ -210,21 +211,31 @@ export default function Appointments() {
           </div>
 
           {/* Add button */}
-          <Button
-            className="w-full h-12 bg-gradient-to-r from-sky-500 to-indigo-500 hover:opacity-90 text-white font-semibold rounded-2xl flex items-center gap-2"
-            onClick={() => setShowForm(!showForm)}
-          >
-            <Plus className="w-5 h-5" />
-            {language === 'fr' ? 'Nouveau rendez-vous' : language === 'ar' ? 'موعد جديد' : 'New Appointment'}
-          </Button>
+          {!showForm && (
+            <button
+              onClick={() => setShowForm(true)}
+              className="w-full h-12 text-white font-extrabold rounded-3xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #80CBC4, #00695C)', boxShadow: '0 6px 20px rgba(0,105,92,0.35)' }}
+            >
+              <Plus size={20} color="white" />
+              {isAr ? 'موعد جديد' : isFr ? 'Nouveau rendez-vous' : 'New Appointment'}
+            </button>
+          )}
 
           {/* Form */}
           {showForm && (
-            <Card className="p-4 space-y-4 border-2 border-sky-200 bg-sky-50/30">
-              <h3 className="font-bold text-foreground flex items-center gap-2">
-                <Stethoscope className="w-5 h-5 text-sky-500" />
-                {language === 'fr' ? 'Nouveau rendez-vous' : language === 'ar' ? 'موعد جديد' : 'New Appointment'}
-              </h3>
+            <div
+              className="p-5 rounded-3xl bg-white space-y-4"
+              style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08)', border: '2px solid #B2DFDB' }}
+            >
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-2xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #80CBC4, #00695C)' }}>
+                  <Stethoscope size={16} color="white" />
+                </div>
+                <p className="text-sm font-extrabold text-gray-800">
+                  {isAr ? 'موعد جديد' : isFr ? 'Nouveau rendez-vous' : 'New Appointment'}
+                </p>
+              </div>
 
               <div className="space-y-3">
                 {/* Doctor name */}
@@ -340,59 +351,68 @@ export default function Appointments() {
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={resetForm}>
-                  {language === 'fr' ? 'Annuler' : language === 'ar' ? 'إلغاء' : 'Cancel'}
-                </Button>
-                <Button
-                  className="flex-1 bg-gradient-to-r from-sky-500 to-indigo-500 text-white"
+                <button
+                  className="flex-1 h-11 rounded-2xl font-bold text-sm border-2 border-gray-200 text-gray-600 bg-white transition-all active:scale-95"
+                  onClick={resetForm}
+                >
+                  {isAr ? 'إلغاء' : isFr ? 'Annuler' : 'Cancel'}
+                </button>
+                <button
+                  className="flex-1 h-11 rounded-2xl font-extrabold text-sm text-white transition-all active:scale-95 disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #80CBC4, #00695C)', boxShadow: '0 4px 12px rgba(0,105,92,0.3)' }}
                   onClick={handleSubmit}
                   disabled={createMutation.isPending}
                 >
                   {createMutation.isPending
-                    ? (language === 'fr' ? 'Enregistrement...' : language === 'ar' ? 'جاري الحفظ...' : 'Saving...')
-                    : (language === 'fr' ? 'Enregistrer' : language === 'ar' ? 'حفظ' : 'Save')}
-                </Button>
+                    ? (isAr ? 'جاري الحفظ...' : isFr ? 'Enregistrement...' : 'Saving...')
+                    : (isAr ? 'حفظ' : isFr ? 'Enregistrer' : 'Save')}
+                </button>
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Tabs */}
-          <div className="flex bg-muted rounded-2xl p-1">
-            <button
-              onClick={() => setActiveTab('upcoming')}
-              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === 'upcoming' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground'}`}
-            >
-              {language === 'fr' ? `À venir (${upcomingAppointments.length})` :
-               language === 'ar' ? `القادمة (${upcomingAppointments.length})` :
-               `Upcoming (${upcomingAppointments.length})`}
-            </button>
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === 'all' ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground'}`}
-            >
-              {language === 'fr' ? `Tous (${allAppointments.length})` :
-               language === 'ar' ? `الكل (${allAppointments.length})` :
-               `All (${allAppointments.length})`}
-            </button>
+          <div className="flex gap-3">
+            {[
+              { key: 'upcoming' as const, label: isAr ? `القادمة (${upcomingAppointments.length})` : isFr ? `À venir (${upcomingAppointments.length})` : `Upcoming (${upcomingAppointments.length})` },
+              { key: 'all' as const, label: isAr ? `الكل (${allAppointments.length})` : isFr ? `Tous (${allAppointments.length})` : `All (${allAppointments.length})` },
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="flex-1 py-3 rounded-3xl text-sm font-extrabold transition-all active:scale-95"
+                style={{
+                  background: activeTab === tab.key ? 'linear-gradient(135deg, #80CBC4, #00695C)' : 'white',
+                  color: activeTab === tab.key ? 'white' : '#6B7280',
+                  boxShadow: activeTab === tab.key ? '0 6px 20px rgba(0,105,92,0.3)' : '0 2px 8px rgba(0,0,0,0.05)',
+                  border: activeTab === tab.key ? 'none' : '1.5px solid #F1F5F9',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           {/* Appointments list */}
           {isLoading ? (
             <div className="space-y-3">
               {[1, 2].map((i) => (
-                <div key={i} className="h-28 bg-muted/40 rounded-2xl animate-pulse" />
+                <div key={i} className="h-28 bg-gray-100 rounded-3xl animate-pulse" />
               ))}
             </div>
           ) : displayedAppointments.length === 0 ? (
-            <div className="text-center py-12">
-              <Calendar className="w-16 h-16 text-muted-foreground/40 mx-auto mb-3" />
-              <p className="text-muted-foreground font-medium">
-                {language === 'fr' ? 'Aucun rendez-vous' : language === 'ar' ? 'لا توجد مواعيد' : 'No appointments'}
+            <div
+              className="py-12 flex flex-col items-center gap-3 rounded-3xl bg-white"
+              style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)', border: '1px solid #F1F5F9' }}
+            >
+              <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: '#E0F2F1' }}>
+                <Calendar size={30} style={{ color: '#00695C' }} />
+              </div>
+              <p className="font-extrabold text-gray-700">
+                {isAr ? 'لا توجد مواعيد' : isFr ? 'Aucun rendez-vous' : 'No appointments'}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {language === 'fr' ? 'Ajoutez votre premier rendez-vous ci-dessus' :
-                 language === 'ar' ? 'أضف موعدك الأول أعلاه' :
-                 'Add your first appointment above'}
+              <p className="text-sm text-gray-400 text-center px-6">
+                {isAr ? 'أضف موعدك الأول أعلاه' : isFr ? 'Ajoutez votre premier rendez-vous ci-dessus' : 'Add your first appointment above'}
               </p>
             </div>
           ) : (
@@ -401,15 +421,22 @@ export default function Appointments() {
                 const isUpcoming = appt.status === 'upcoming' && new Date(appt.appointmentDate) >= new Date();
                 const daysUntil = getDaysUntil(appt.appointmentDate, language);
                 return (
-                  <Card
+                  <div
                     key={appt.id}
-                    className={`p-4 space-y-3 border-2 transition-all ${isUpcoming ? 'border-sky-200 bg-gradient-to-br from-sky-50/50 to-indigo-50/50' : 'border-border'}`}
+                    className="p-4 rounded-3xl bg-white"
+                    style={{
+                      boxShadow: isUpcoming ? '0 6px 20px rgba(0,105,92,0.12)' : '0 4px 12px rgba(0,0,0,0.05)',
+                      border: isUpcoming ? '2px solid #B2DFDB' : '1px solid #F1F5F9',
+                    }}
                   >
                     {/* Header row */}
-                    <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-start justify-between gap-2 mb-3">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${isUpcoming ? 'bg-sky-100' : 'bg-muted'}`}>
-                          <Stethoscope className={`w-5 h-5 ${isUpcoming ? 'text-sky-600' : 'text-muted-foreground'}`} />
+                        <div
+                          className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                          style={{ background: isUpcoming ? 'linear-gradient(135deg, #80CBC4, #00695C)' : '#F3F4F6', boxShadow: isUpcoming ? '0 4px 12px rgba(0,105,92,0.3)' : 'none' }}
+                        >
+                          <Stethoscope size={18} style={{ color: isUpcoming ? 'white' : '#9CA3AF' }} />
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold text-foreground truncate">{appt.doctorName}</p>
@@ -418,7 +445,13 @@ export default function Appointments() {
                           )}
                         </div>
                       </div>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${statusColor[appt.status as AppointmentStatus]}`}>
+                      <span
+                        className="text-[10px] font-extrabold px-3 py-1 rounded-full flex-shrink-0"
+                        style={{
+                          background: appt.status === 'upcoming' ? '#E0F2F1' : appt.status === 'completed' ? '#E8F5E9' : '#FFEBEE',
+                          color: appt.status === 'upcoming' ? '#00695C' : appt.status === 'completed' ? '#2E7D32' : '#C62828',
+                        }}
+                      >
                         {statusLabel(appt.status as AppointmentStatus)}
                       </span>
                     </div>
@@ -461,36 +494,33 @@ export default function Appointments() {
 
                     {/* Actions */}
                     {appt.status === 'upcoming' && (
-                      <div className="flex gap-2 pt-1">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          className="flex-1 h-9 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-95"
+                          style={{ background: '#E8F5E9', color: '#2E7D32', border: '1.5px solid #C8E6C9' }}
                           onClick={() => updateStatusMutation.mutate({ id: appt.id, status: 'completed' })}
                         >
-                          <CheckCircle2 className="w-4 h-4 mr-1" />
-                          {language === 'fr' ? 'Terminé' : language === 'ar' ? 'مكتمل' : 'Done'}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 text-red-500 border-red-200 hover:bg-red-50"
+                          <CheckCircle2 size={14} />
+                          {isAr ? 'مكتمل' : isFr ? 'Terminé' : 'Done'}
+                        </button>
+                        <button
+                          className="flex-1 h-9 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-1 transition-all active:scale-95"
+                          style={{ background: '#FFF8E1', color: '#E65100', border: '1.5px solid #FFE082' }}
                           onClick={() => updateStatusMutation.mutate({ id: appt.id, status: 'cancelled' })}
                         >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          {language === 'fr' ? 'Annuler' : language === 'ar' ? 'إلغاء' : 'Cancel'}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="text-red-400 border-red-100 hover:bg-red-50 px-3"
+                          <XCircle size={14} />
+                          {isAr ? 'إلغاء' : isFr ? 'Annuler' : 'Cancel'}
+                        </button>
+                        <button
+                          className="w-9 h-9 rounded-2xl flex items-center justify-center transition-all active:scale-95"
+                          style={{ background: '#FFEBEE', border: '1.5px solid #FFCDD2' }}
                           onClick={() => deleteMutation.mutate({ id: appt.id })}
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                          <Trash2 size={14} style={{ color: '#C62828' }} />
+                        </button>
                       </div>
                     )}
-                  </Card>
+                  </div>
                 );
               })}
             </div>
