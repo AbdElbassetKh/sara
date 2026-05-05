@@ -1,3 +1,4 @@
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';

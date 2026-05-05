@@ -1,3 +1,4 @@
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,14 +39,16 @@ export default function Growth() {
   const previousRecord = GROWTH_DATA[GROWTH_DATA.length - 2];
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
       <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header */}
-        <div className="pt-2">
-          <h1 className="text-2xl font-bold text-foreground">{t('growthTracker')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {language === 'fr' ? "Suivez le développement de votre enfant" : language === 'ar' ? 'تابع نمو طفلك' : "Monitor your child's development"}
-          </p>
+        <div className="page-header-green px-4 pt-10 pb-6">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-2xl font-extrabold text-white">{t('growthTracker')}</h1>
+            <p className="text-sm text-white/80 mt-1">
+              {language === 'fr' ? "Suivez le développement de votre enfant" : language === 'ar' ? 'تابع نمو طفلك' : "Monitor your child's development"}
+            </p>
+          </div>
         </div>
 
         {/* Latest Measurements */}

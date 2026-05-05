@@ -1,3 +1,4 @@
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -61,17 +62,17 @@ export default function EmergencyPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-red-50 pb-24">
+    <div className="min-h-screen bg-red-50 pb-24 overflow-x-hidden">
       <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header - Red Alert */}
         <div className="space-y-3 text-center pt-4">
           <div className="flex justify-center">
-            <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-lg">
+            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg border-2 border-white/40">
               <AlertTriangle size={32} className="text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-red-900">{t('emergency')}</h1>
-          <p className="text-red-700 text-sm px-4">{t('emergencyWarning')}</p>
+          <h1 className="text-2xl font-extrabold text-white">{t('emergency')}</h1>
+          <p className="text-white/80 text-sm px-4">{t('emergencyWarning')}</p>
         </div>
 
         {/* Emergency Calls */}

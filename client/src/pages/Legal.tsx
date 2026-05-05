@@ -3,7 +3,7 @@ import { ChevronLeft, Shield, FileText, Users, ExternalLink } from 'lucide-react
 import { useLocation, useParams } from 'wouter';
 import { Card } from '@/components/ui/card';
 
-const LOGO_URL = '/manus-storage/allenest-logo_9219c293.png';
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
 type LegalPage = 'privacy' | 'terms' | 'partners';
 

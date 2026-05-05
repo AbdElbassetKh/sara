@@ -1,3 +1,4 @@
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle, Clock } from 'lucide-react';
@@ -22,14 +23,16 @@ export default function Vaccines() {
   const pendingCount = VACCINES.filter((v) => v.status === 'pending').length;
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
       <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header */}
-        <div className="pt-2">
-          <h1 className="text-2xl font-bold text-foreground">{t('vaccineJournal')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {language === 'fr' ? "Suivez les vaccinations de votre enfant" : language === 'ar' ? 'تابع تطعيمات طفلك' : "Track your child's vaccinations"}
-          </p>
+        <div className="page-header-gradient px-4 pt-10 pb-6">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-2xl font-extrabold text-white">{t('vaccineJournal')}</h1>
+            <p className="text-sm text-white/80 mt-1">
+              {language === 'fr' ? "Suivez les vaccinations de votre enfant" : language === 'ar' ? 'تابع تطعيمات طفلك' : "Track your child's vaccinations"}
+            </p>
+          </div>
         </div>
 
         {/* Stats */}

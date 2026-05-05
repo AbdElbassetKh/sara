@@ -7,7 +7,7 @@ import { Star, Heart, ChevronLeft, MessageSquare, ThumbsUp } from 'lucide-react'
 import { useLocation } from 'wouter';
 import { useState } from 'react';
 
-const LOGO_URL = '/manus-storage/allenest-logo_9219c293.png';
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
 export default function RateApp() {
   const { language } = useLanguage();

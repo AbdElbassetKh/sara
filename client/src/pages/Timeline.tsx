@@ -1,3 +1,4 @@
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Apple, AlertCircle, Stethoscope, TrendingUp, Syringe } from 'lucide-react';
@@ -69,11 +70,13 @@ export default function Timeline() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden">
       <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header */}
-        <div className="pt-2">
-          <h1 className="text-2xl font-bold text-foreground">{t('timeline')}</h1>
+        <div className="page-header-purple px-4 pt-10 pb-6">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-2xl font-extrabold text-white">{t('timeline')}</h1>
+          </div>
         </div>
 
         {/* Tabs */}

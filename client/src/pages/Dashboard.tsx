@@ -1,130 +1,195 @@
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { useAuth } from '@/_core/hooks/useAuth';
 import { useLanguage } from '@/contexts/LanguageContext';
-import {
-  Apple,
-  AlertCircle,
-  TrendingUp,
-  Stethoscope,
-  Activity,
-  Syringe,
-  Plus,
-  Sun,
-  Crown,
-} from 'lucide-react';
 import { useLocation } from 'wouter';
+import { trpc } from '@/lib/trpc';
+import {
+  Apple, AlertCircle, TrendingUp, Stethoscope, Activity,
+  Syringe, Sun, Crown, Bell, ChevronRight, Heart, Shield,
+  Baby, Plus
+} from 'lucide-react';
 
-const LOGO_URL = '/manus-storage/allenest-logo_9219c293.png';
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
 export default function Dashboard() {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
 
   const hour = new Date().getHours();
   const greeting =
     hour < 12 ? t('goodMorning') : hour < 18 ? t('goodAfternoon') : t('goodEvening');
 
+  const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
   const QUICK_ACTIONS = [
-    { icon: Apple, label: t('actionTrackMeal'), color: 'text-green-600', path: '/meals' },
-    { icon: AlertCircle, label: t('actionEmergency'), color: 'text-red-600', path: '/emergency' },
-    { icon: TrendingUp, label: t('actionAiInsights'), color: 'text-blue-600', path: '/insights' },
-    { icon: Stethoscope, label: t('actionDoctor'), color: 'text-purple-600', path: '/doctor' },
-    { icon: Activity, label: t('actionGrowth'), color: 'text-orange-600', path: '/growth' },
-    { icon: Syringe, label: t('actionVaccines'), color: 'text-pink-600', path: '/vaccines' },
-    { icon: Sun, label: language === 'fr' ? 'Bilan du jour' : language === 'ar' ? 'بيلان اليوم' : 'Daily Check-in', color: 'text-yellow-600', path: '/daily-checkin' },
-    { icon: Crown, label: language === 'fr' ? 'Premium' : language === 'ar' ? 'المميز' : 'Premium', color: 'text-amber-600', path: '/premium' },
+    { icon: Apple,       label: t('actionTrackMeal'),   bg: 'bg-sky-100',    iconColor: 'text-sky-600',    path: '/meals' },
+    { icon: Activity,    label: language==='fr'?'Symptômes':language==='ar'?'الأعراض':'Symptoms', bg: 'bg-pink-100', iconColor: 'text-pink-600', path: '/symptoms' },
+    { icon: TrendingUp,  label: t('actionAiInsights'),  bg: 'bg-purple-100', iconColor: 'text-purple-600', path: '/insights' },
+    { icon: AlertCircle, label: t('actionEmergency'),   bg: 'bg-red-100',    iconColor: 'text-red-600',    path: '/emergency' },
+    { icon: Stethoscope, label: t('actionDoctor'),      bg: 'bg-indigo-100', iconColor: 'text-indigo-600', path: '/doctor' },
+    { icon: Syringe,     label: t('actionVaccines'),    bg: 'bg-teal-100',   iconColor: 'text-teal-600',   path: '/vaccines' },
+    { icon: Activity,    label: language==='fr'?'Croissance':language==='ar'?'النمو':'Growth', bg: 'bg-orange-100', iconColor: 'text-orange-600', path: '/growth' },
+    { icon: Sun,         label: language==='fr'?'Bilan du jour':language==='ar'?'بيلان اليوم':'Daily Check-in', bg: 'bg-yellow-100', iconColor: 'text-yellow-600', path: '/daily-checkin' },
+  ];
+
+  const STATS = [
+    { label: language==='fr'?'Repas ce mois':language==='ar'?'وجبات هذا الشهر':'Meals this month', value: '24', icon: Apple, color: 'text-sky-500', bg: 'bg-sky-50' },
+    { label: language==='fr'?'Jours sans symptôme':language==='ar'?'أيام بدون أعراض':'Days symptom-free', value: '5', icon: Shield, color: 'text-green-500', bg: 'bg-green-50' },
+    { label: language==='fr'?'Alertes actives':language==='ar'?'تنبيهات نشطة':'Active alerts', value: '2', icon: Bell, color: 'text-red-500', bg: 'bg-red-50' },
+    { label: language==='fr'?'Vaccins à jour':language==='ar'?'اللقاحات محدثة':'Vaccines up to date', value: '8', icon: Syringe, color: 'text-purple-500', bg: 'bg-purple-50' },
   ];
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Header with Logo */}
-      <div className="bg-card border-b border-border px-4 py-3 flex items-center gap-3 max-w-md mx-auto">
-        <img src={LOGO_URL} alt="AlleNest" className="w-10 h-10 object-contain rounded-full" />
-        <div>
-          <h1 className="text-base font-bold text-foreground leading-tight">AlleNest</h1>
-          <p className="text-[10px] text-muted-foreground leading-tight">Child Safety AI</p>
+
+      {/* ── Header ── */}
+      <div className="page-header-gradient px-4 pt-10 pb-6">
+        <div className="max-w-md mx-auto">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={LOGO_URL} alt="AlleNest" className="w-11 h-11 rounded-full object-cover shadow-md border-2 border-white/60" />
+              <div>
+                <p className="text-white/80 text-xs font-medium">AlleNest · Child Safety AI</p>
+                <h1 className="text-white text-lg font-bold leading-tight">
+                  {greeting}, {user?.name?.split(' ')[0] || 'Parent'} 👋
+                </h1>
+              </div>
+            </div>
+            <button
+              onClick={() => setLocation('/notifications')}
+              className="relative w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm"
+            >
+              <Bell className="w-5 h-5 text-white" />
+              {unreadCount && unreadCount > 0 ? (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-[10px] text-white font-bold flex items-center justify-center shadow">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              ) : null}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto p-4 space-y-5">
-        {/* Welcome Card */}
-        <Card className="bg-gradient-to-r from-primary/10 to-secondary/10 p-5 space-y-1 border-0 shadow-sm">
-          <h2 className="text-xl font-bold text-foreground">{greeting}</h2>
-          <p className="text-muted-foreground text-sm">{language === 'fr' ? 'Emma se porte bien aujourd\'hui 🌟' : language === 'ar' ? 'إيما بخير اليوم 🌟' : 'Emma is doing great today 🌟'}</p>
-        </Card>
+      <div className="max-w-md mx-auto px-4 -mt-3 space-y-5">
 
-        {/* Health Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="p-4 text-center space-y-1 shadow-sm">
-            <div className="text-2xl font-bold text-primary">8</div>
-            <p className="text-[10px] text-muted-foreground leading-tight">{t('mealsTracked')}</p>
-          </Card>
-          <Card className="p-4 text-center space-y-1 shadow-sm">
-            <div className="text-2xl font-bold text-secondary">2</div>
-            <p className="text-[10px] text-muted-foreground leading-tight">{t('symptoms')}</p>
-          </Card>
-          <Card className="p-4 text-center space-y-1 shadow-sm">
-            <div className="text-2xl font-bold text-green-600">5</div>
-            <p className="text-[10px] text-muted-foreground leading-tight">{t('daysSafe')}</p>
-          </Card>
-        </div>
-
-        {/* Alert Banner */}
-        <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-start gap-3">
-          <AlertCircle size={18} className="text-red-500 flex-shrink-0 mt-0.5" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-red-700">{t('allergenDetected')}</p>
-            <p className="text-xs text-red-500 mt-0.5">{t('allergenMessage')}</p>
+        {/* ── Alert Banner ── */}
+        <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
+          <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+            <AlertCircle className="w-5 h-5 text-red-600" />
           </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-red-700">
+              {language === 'fr' ? 'Allergène détecté' : language === 'ar' ? 'تم اكتشاف مسبب حساسية' : 'Allergen Detected'}
+            </p>
+            <p className="text-xs text-red-500 mt-0.5">
+              {language === 'fr' ? 'Lait détecté dans le dernier repas enregistré' : language === 'ar' ? 'تم اكتشاف الحليب في آخر وجبة مسجلة' : 'Milk detected in last logged meal'}
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-red-400 flex-shrink-0 mt-1" />
         </div>
 
-        {/* Quick Actions */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">{t('quickActions')}</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {QUICK_ACTIONS.map(({ icon: Icon, label, color, path }) => (
-              <Button
-                key={label}
-                variant="outline"
-                className="h-24 flex flex-col items-center justify-center gap-2 rounded-xl border-2 hover:border-primary hover:bg-primary/5 transition-all"
-                onClick={() => setLocation(path)}
+        {/* ── Stats Row ── */}
+        <div className="grid grid-cols-2 gap-3">
+          {STATS.map((s) => (
+            <div key={s.label} className="stat-card flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center flex-shrink-0`}>
+                <s.icon className={`w-5 h-5 ${s.color}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xl font-extrabold text-foreground leading-tight">{s.value}</p>
+                <p className="text-[10px] text-muted-foreground leading-tight truncate">{s.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Quick Actions ── */}
+        <div>
+          <div className="section-header">
+            <h2 className="section-title">
+              {language === 'fr' ? 'Actions rapides' : language === 'ar' ? 'إجراءات سريعة' : 'Quick Actions'}
+            </h2>
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {QUICK_ACTIONS.map((action) => (
+              <button
+                key={action.path}
+                onClick={() => setLocation(action.path)}
+                className="quick-action-card"
               >
-                <Icon size={24} className={color} />
-                <span className="text-xs font-medium text-foreground text-center leading-tight">{label}</span>
-              </Button>
+                <div className={`quick-action-icon ${action.bg}`}>
+                  <action.icon className={`w-6 h-6 ${action.iconColor}`} />
+                </div>
+                <span className="text-[10px] font-semibold text-gray-600 text-center leading-tight">{action.label}</span>
+              </button>
             ))}
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold text-foreground">{t('recentActivity')}</h2>
+        {/* ── Premium Banner ── */}
+        <div
+          className="card-blue p-4 flex items-center gap-4 cursor-pointer"
+          onClick={() => setLocation('/premium')}
+        >
+          <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Crown className="w-7 h-7 text-white" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-bold text-sm">
+              {language === 'fr' ? 'Passer à Premium' : language === 'ar' ? 'الترقية إلى المميز' : 'Upgrade to Premium'}
+            </p>
+            <p className="text-white/80 text-xs mt-0.5">
+              {language === 'fr' ? 'Analyses IA avancées, rapports PDF illimités' : language === 'ar' ? 'تحليلات ذكاء اصطناعي متقدمة، تقارير PDF غير محدودة' : 'Advanced AI analysis, unlimited PDF reports'}
+            </p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-white/80 flex-shrink-0" />
+        </div>
+
+        {/* ── Recent Activity ── */}
+        <div>
+          <div className="section-header">
+            <h2 className="section-title">
+              {language === 'fr' ? 'Activité récente' : language === 'ar' ? 'النشاط الأخير' : 'Recent Activity'}
+            </h2>
+            <button onClick={() => setLocation('/timeline')} className="section-link">
+              {language === 'fr' ? 'Voir tout' : language === 'ar' ? 'عرض الكل' : 'See all'}
+            </button>
+          </div>
           <div className="space-y-2">
             {[
-              { time: language === 'fr' ? 'Aujourd\'hui 14h30' : language === 'ar' ? 'اليوم 2:30 م' : 'Today 2:30 PM', activity: language === 'fr' ? 'Pomme et banane mangées' : language === 'ar' ? 'تناول التفاح والموز' : 'Apple and banana eaten', type: 'meal' },
-              { time: language === 'fr' ? 'Aujourd\'hui 13h15' : language === 'ar' ? 'اليوم 1:15 م' : 'Today 1:15 PM', activity: language === 'fr' ? 'Légère éruption observée' : language === 'ar' ? 'لوحظ طفح خفيف' : 'Mild rash observed', type: 'symptom' },
-              { time: language === 'fr' ? 'Hier 10h00' : language === 'ar' ? 'أمس 10:00 ص' : 'Yesterday 10:00 AM', activity: language === 'fr' ? 'Visite chez Dr. Smith' : language === 'ar' ? 'زيارة الدكتور سميث' : 'Visited Dr. Smith', type: 'doctor' },
-            ].map((item, idx) => (
-              <Card key={idx} className="p-3 flex items-start gap-3 shadow-sm">
-                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground">{item.activity}</p>
-                  <p className="text-xs text-muted-foreground">{item.time}</p>
+              { icon: Apple, color: 'bg-sky-100 text-sky-600', title: language==='fr'?'Repas enregistré':language==='ar'?'وجبة مسجلة':'Meal logged', sub: language==='fr'?'Lait, Blé, Œufs':language==='ar'?'حليب، قمح، بيض':'Milk, Wheat, Eggs', time: '10:30', dot: 'bg-sky-400' },
+              { icon: Activity, color: 'bg-pink-100 text-pink-600', title: language==='fr'?'Symptôme signalé':language==='ar'?'عرض مُبلَّغ عنه':'Symptom reported', sub: language==='fr'?'Éruption cutanée – Modéré':language==='ar'?'طفح جلدي – متوسط':'Skin rash – Moderate', time: '08:15', dot: 'bg-pink-400' },
+              { icon: Shield, color: 'bg-green-100 text-green-600', title: language==='fr'?'Aucun symptôme':language==='ar'?'لا أعراض':'No symptoms', sub: language==='fr'?'Journée calme 🎉':language==='ar'?'يوم هادئ 🎉':'Calm day 🎉', time: language==='fr'?'Hier':language==='ar'?'أمس':'Yesterday', dot: 'bg-green-400' },
+            ].map((item, i) => (
+              <div key={i} className="bg-white rounded-2xl p-3 flex items-center gap-3 border border-gray-100 shadow-sm">
+                <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0`}>
+                  <item.icon className="w-5 h-5" />
                 </div>
-              </Card>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{item.sub}</p>
+                </div>
+                <span className="text-[10px] text-muted-foreground flex-shrink-0">{item.time}</span>
+              </div>
             ))}
           </div>
         </div>
-      </div>
 
-      {/* Floating Action Button */}
-      <button
-        className="fixed bottom-24 right-4 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center hover:bg-primary/90 transition-all active:scale-95"
-        title={t('add')}
-        onClick={() => setLocation('/meals')}
-      >
-        <Plus size={24} />
-      </button>
+        {/* ── Add Child Button ── */}
+        <button
+          onClick={() => setLocation('/child-profile-setup')}
+          className="w-full flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-primary/30 bg-primary/5 text-primary font-semibold text-sm transition-all hover:border-primary/50 hover:bg-primary/10"
+        >
+          <div className="w-9 h-9 rounded-xl bg-primary/15 flex items-center justify-center">
+            <Plus className="w-5 h-5" />
+          </div>
+          {language === 'fr' ? 'Ajouter un enfant' : language === 'ar' ? 'إضافة طفل' : 'Add a child'}
+        </button>
+
+      </div>
     </div>
   );
 }

@@ -1,3 +1,4 @@
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,30 +79,33 @@ export default function Insights() {
   const aiResult = analysisMutation.data;
 
   return (
-    <div className="min-h-screen bg-background pb-24" dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="min-h-screen bg-background pb-24 overflow-x-hidden" dir={language === 'ar' ? 'rtl' : 'ltr'}>
       <div className="max-w-md mx-auto p-4 space-y-5">
-        {/* Header */}
-        <div className="pt-2 flex items-center justify-between">
+      </div>
+      {/* Header gradient */}
+      <div className="page-header-pink px-4 pt-10 pb-6">
+        <div className="max-w-md mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
+            <h1 className="text-2xl font-extrabold text-white">
               {t('Insights IA', 'رؤى الذكاء الاصطناعي', 'AI Insights')}
             </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
+            <p className="text-sm text-white/80 mt-0.5">
               {t('Analyse des 30 derniers jours', 'تحليل آخر 30 يوماً', 'Last 30 days analysis')}
             </p>
           </div>
-          <Button
+          <button
             onClick={handleRunAnalysis}
             disabled={analysisMutation.isPending || !selectedChildId}
-            size="sm"
-            className="gap-1.5"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm text-white text-sm font-semibold border border-white/30 transition-all active:scale-95 disabled:opacity-50"
           >
             {analysisMutation.isPending
               ? <Loader2 className="w-4 h-4 animate-spin" />
               : <RefreshCw className="w-4 h-4" />}
             {t('Analyser', 'تحليل', 'Analyze')}
-          </Button>
+          </button>
         </div>
+      </div>
+      <div className="max-w-md mx-auto px-4 -mt-2 space-y-5">
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 gap-3">

@@ -10,7 +10,7 @@ import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, Users, Che
 import { trpc } from '@/lib/trpc';
 import { useLocation } from 'wouter';
 
-const LOGO_URL = '/manus-storage/allenest-logo_9219c293.png';
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
 export default function Settings() {
   const { language, setLanguage, t } = useLanguage();

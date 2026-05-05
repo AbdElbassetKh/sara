@@ -1,3 +1,4 @@
+const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -58,11 +59,13 @@ export default function Doctor() {
     <div className="min-h-screen bg-background pb-24">
       <div className="max-w-md mx-auto p-4 space-y-5">
         {/* Header */}
-        <div className="pt-2">
-          <h1 className="text-2xl font-bold text-foreground">{t('doctorVisits')}</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {language === 'fr' ? "Suivez les rendez-vous médicaux et les dossiers" : language === 'ar' ? 'تتبع المواعيد الطبية والسجلات' : "Track medical appointments and records"}
-          </p>
+        <div className="page-header-gradient px-4 pt-10 pb-6">
+          <div className="max-w-md mx-auto">
+            <h1 className="text-2xl font-extrabold text-white">{t('doctorVisits')}</h1>
+            <p className="text-sm text-white/80 mt-1">
+              {language === 'fr' ? "Suivez les rendez-vous médicaux et les dossiers" : language === 'ar' ? 'تتبع المواعيد الطبية والسجلات' : "Track medical appointments and records"}
+            </p>
+          </div>
         </div>
 
         {/* Quick Stats */}
