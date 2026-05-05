@@ -1,6 +1,5 @@
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { Home, Clock, Lightbulb, BookOpen, Settings } from 'lucide-react';
-import { useLocation } from 'wouter';
 
 const NAV_ITEMS = [
   { path: '/', icon: Home, label: 'Home' },
@@ -18,18 +17,18 @@ export default function BottomNavigation() {
       {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
         const isActive = location === path;
         return (
-          <Link key={path} href={path}>
-            <a
-              className={`flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium rounded-lg transition-all flex-1 h-full ${
-                isActive
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-muted hover:bg-muted/10'
-              }`}
-              title={label}
-            >
-              <Icon size={24} />
-              <span className="text-xs">{label}</span>
-            </a>
+          <Link
+            key={path}
+            href={path}
+            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium rounded-lg transition-all flex-1 h-full ${
+              isActive
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted hover:bg-muted/10'
+            }`}
+            title={label}
+          >
+            <Icon size={24} />
+            <span className="text-xs">{label}</span>
           </Link>
         );
       })}
