@@ -1,8 +1,10 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES, getLoginUrl } from '@/const';
+import { SUPPORTED_LANGUAGES, getLoginUrl } from '@/const';
 import { Shield, Sparkles, Heart, Activity, Stethoscope, Apple } from 'lucide-react';
 
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
+const FAMILY_IMG = '/manus-storage/family-illustration_815e9745.png';
+const BABY_HERO_IMG = '/manus-storage/baby-hero_463105f2.png';
 
 export default function Onboarding() {
   const { setLanguage, language } = useLanguage();
@@ -17,7 +19,7 @@ export default function Onboarding() {
   const FEATURES = [
     {
       icon: Activity,
-      label: isAr ? 'تسجيل الأعراض' : isFr ? 'Suivi des symptômes' : 'Track Symptoms',
+      label: isAr ? 'تسجيل الأعراض' : isFr ? 'Symptômes' : 'Track Symptoms',
       gradient: 'linear-gradient(135deg, #4FC3F7, #0288D1)',
       shadow: 'rgba(79,195,247,0.4)',
     },
@@ -29,25 +31,25 @@ export default function Onboarding() {
     },
     {
       icon: Shield,
-      label: isAr ? 'وضع الطوارئ' : isFr ? 'Mode Urgence' : 'Emergency Mode',
+      label: isAr ? 'طوارئ' : isFr ? 'Urgence' : 'Emergency',
       gradient: 'linear-gradient(135deg, #EF9A9A, #E53935)',
       shadow: 'rgba(239,83,80,0.4)',
     },
     {
       icon: Heart,
-      label: isAr ? 'مركز النصائح' : isFr ? 'Centre Conseils' : 'Advice Center',
+      label: isAr ? 'النصائح' : isFr ? 'Conseils' : 'Advice',
       gradient: 'linear-gradient(135deg, #F48FB1, #E91E8C)',
       shadow: 'rgba(244,143,177,0.4)',
     },
     {
       icon: Stethoscope,
-      label: isAr ? 'متابعة الطبيب' : isFr ? 'Suivi Médecin' : 'Doctor Follow-up',
+      label: isAr ? 'الطبيب' : isFr ? 'Médecin' : 'Doctor',
       gradient: 'linear-gradient(135deg, #9FA8DA, #3949AB)',
       shadow: 'rgba(159,168,218,0.4)',
     },
     {
       icon: Apple,
-      label: isAr ? 'تتبع الطعام' : isFr ? 'Suivi Repas' : 'Track Meals',
+      label: isAr ? 'الطعام' : isFr ? 'Repas' : 'Meals',
       gradient: 'linear-gradient(135deg, #80DEEA, #00838F)',
       shadow: 'rgba(128,222,234,0.4)',
     },
@@ -58,7 +60,7 @@ export default function Onboarding() {
       code: 'ar' as const,
       label: 'العربية',
       flag: '🇩🇿',
-      sub: 'Arabic',
+      sub: isAr ? 'عربي' : isFr ? 'Arabe' : 'Arabic',
       gradient: 'linear-gradient(135deg, #F48FB1, #E91E8C)',
       shadow: 'rgba(244,143,177,0.45)',
     },
@@ -66,7 +68,7 @@ export default function Onboarding() {
       code: 'fr' as const,
       label: 'Français',
       flag: '🇫🇷',
-      sub: 'French',
+      sub: isAr ? 'فرنسي' : isFr ? 'Français' : 'French',
       gradient: 'linear-gradient(135deg, #4FC3F7, #0288D1)',
       shadow: 'rgba(79,195,247,0.45)',
     },
@@ -74,7 +76,7 @@ export default function Onboarding() {
       code: 'en' as const,
       label: 'English',
       flag: '🇬🇧',
-      sub: 'English',
+      sub: isAr ? 'إنجليزي' : isFr ? 'Anglais' : 'English',
       gradient: 'linear-gradient(135deg, #A5D6A7, #388E3C)',
       shadow: 'rgba(165,214,167,0.45)',
     },
@@ -83,56 +85,95 @@ export default function Onboarding() {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: '#F9FAFB', fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+      style={{ background: '#F0F7FF', fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+      dir={isAr ? 'rtl' : 'ltr'}
     >
       {/* Hero Section */}
       <div
-        className="relative overflow-hidden flex flex-col items-center justify-center px-6 pt-16 pb-10"
+        className="relative overflow-hidden flex flex-col items-center justify-end px-6 pt-10 pb-0"
         style={{
-          background: 'linear-gradient(160deg, #4FC3F7 0%, #29B6F6 40%, #F8BBD0 100%)',
-          borderBottomLeftRadius: '40px',
-          borderBottomRightRadius: '40px',
-          boxShadow: '0 12px 40px rgba(79,195,247,0.35)',
-          minHeight: '42vh',
+          background: 'linear-gradient(160deg, #4FC3F7 0%, #29B6F6 50%, #F8BBD0 100%)',
+          borderBottomLeftRadius: '48px',
+          borderBottomRightRadius: '48px',
+          boxShadow: '0 16px 48px rgba(79,195,247,0.4)',
+          minHeight: '52vh',
         }}
       >
-        {/* Blobs */}
-        <div className="absolute top-0 right-0 w-52 h-52 rounded-full opacity-20 pointer-events-none" style={{ background: 'white', transform: 'translate(40%, -40%)' }} />
-        <div className="absolute bottom-0 left-0 w-36 h-36 rounded-full opacity-15 pointer-events-none" style={{ background: 'white', transform: 'translate(-30%, 40%)' }} />
-        <div className="absolute top-1/2 left-1/2 w-64 h-64 rounded-full opacity-10 pointer-events-none" style={{ background: 'white', transform: 'translate(-50%, -50%)' }} />
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-56 h-56 rounded-full opacity-20 pointer-events-none" style={{ background: 'white', transform: 'translate(35%, -35%)' }} />
+        <div className="absolute bottom-0 left-0 w-40 h-40 rounded-full opacity-15 pointer-events-none" style={{ background: 'white', transform: 'translate(-25%, 35%)' }} />
+        <div className="absolute top-4 left-6 w-20 h-20 rounded-full opacity-10 pointer-events-none" style={{ background: 'white' }} />
 
-        {/* Logo */}
-        <div className="relative mb-4">
-          <div className="absolute inset-0 rounded-full blur-2xl opacity-40" style={{ background: 'white', transform: 'scale(1.3)' }} />
-          <img
-            src={LOGO_URL}
-            alt="AlleNest"
-            className="relative w-28 h-28 rounded-full object-cover border-4 border-white/70"
-            style={{ boxShadow: '0 12px 40px rgba(0,0,0,0.2)' }}
-          />
+        {/* Logo + App name row */}
+        <div className="absolute top-8 left-0 right-0 flex items-center justify-center gap-3 px-6">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full blur-xl opacity-50" style={{ background: 'white', transform: 'scale(1.4)' }} />
+            <img
+              src={LOGO_URL}
+              alt="AlleNest"
+              className="relative w-14 h-14 rounded-full object-cover border-3 border-white/80"
+              style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.2)', borderWidth: '3px', borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.8)' }}
+            />
+          </div>
+          <div>
+            <h1
+              className="text-3xl font-black text-white leading-none"
+              style={{ textShadow: '0 2px 12px rgba(0,0,0,0.15)', fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+            >
+              AlleNest
+            </h1>
+            <p className="text-white/80 text-xs font-medium mt-0.5">
+              {isAr ? 'رفيقك الذكي لصحة طفلك' : isFr ? 'Votre compagnon santé enfant' : 'Your smart child health companion'}
+            </p>
+          </div>
         </div>
 
-        {/* Title */}
-        <h1
-          className="text-4xl font-black text-white text-center leading-tight"
-          style={{ textShadow: '0 2px 12px rgba(0,0,0,0.15)' }}
-        >
-          AlleNest
-        </h1>
+        {/* Greeting text */}
+        <div className="relative z-10 text-center mb-2 mt-20">
+          <p
+            className="font-black leading-tight"
+            style={{
+              fontSize: '2rem',
+              color: '#E91E8C',
+              textShadow: '0 2px 8px rgba(233,30,140,0.25)',
+              fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif",
+            }}
+          >
+            {isAr ? 'مرحباً أمي 💙' : isFr ? 'Bonjour Maman 💙' : 'Hello Mum 💙'}
+          </p>
+          <p
+            className="font-black leading-tight"
+            style={{
+              fontSize: '2rem',
+              color: '#0288D1',
+              textShadow: '0 2px 8px rgba(2,136,209,0.25)',
+              fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif",
+            }}
+          >
+            {isAr ? 'مرحباً أبي 💙' : isFr ? 'Bonjour Papa 💙' : 'Hello Dad 💙'}
+          </p>
+          <p className="text-white/90 text-sm font-semibold mt-2">
+            {isAr ? 'نحن مع طفلك في كل لحظة ❤️' : isFr ? 'Nous veillons sur votre enfant ❤️' : 'We care for your child\'s health ❤️'}
+          </p>
+        </div>
 
-        {/* Signature */}
-        <p className="text-white/90 text-sm font-semibold text-center mt-2 max-w-xs leading-relaxed">
-          ✨ {isAr ? 'لأن كل بكاء طفلك له سبب' : isFr ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'} ✨
-        </p>
-
-        {/* Tagline */}
-        <p className="text-white/70 text-xs text-center mt-1.5 max-w-xs">
-          {isAr
-            ? 'رفيقك الذكي لصحة طفلك وسلامته'
-            : isFr
-            ? 'Votre compagnon intelligent pour la santé de votre enfant'
-            : 'Your smart companion for your child\'s health & safety'}
-        </p>
+        {/* Family illustration — bottom aligned, partially clipped */}
+        <div className="relative z-10 flex items-end justify-center w-full" style={{ height: '220px', marginTop: '8px' }}>
+          {/* Baby hero on the right */}
+          <img
+            src={BABY_HERO_IMG}
+            alt="Baby"
+            className="absolute right-4 bottom-0 object-contain drop-shadow-2xl"
+            style={{ height: '180px', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.15))' }}
+          />
+          {/* Family on the left/center */}
+          <img
+            src={FAMILY_IMG}
+            alt="Family"
+            className="absolute left-0 bottom-0 object-contain drop-shadow-2xl"
+            style={{ height: '210px', filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.12))' }}
+          />
+        </div>
       </div>
 
       {/* Content */}
@@ -184,7 +225,7 @@ export default function Onboarding() {
                   <p className="text-white/75 text-xs">{l.sub}</p>
                 </div>
                 <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">→</span>
+                  <span className="text-white font-bold text-lg">{isAr ? '←' : '→'}</span>
                 </div>
               </button>
             ))}
@@ -207,11 +248,11 @@ export default function Onboarding() {
         </div>
 
         {/* Footer */}
-        <p className="text-[10px] text-gray-400 text-center pb-4">
+        <p className="text-[10px] text-gray-400 text-center pb-6">
           {isAr
             ? 'بالمتابعة، أنت توافق على شروط الاستخدام وسياسة الخصوصية'
             : isFr
-            ? 'En continuant, vous acceptez nos Conditions d\'utilisation et notre Politique de confidentialité'
+            ? "En continuant, vous acceptez nos Conditions d'utilisation et notre Politique de confidentialité"
             : 'By continuing, you agree to our Terms of Service and Privacy Policy'}
         </p>
       </div>

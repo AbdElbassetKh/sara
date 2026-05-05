@@ -7,6 +7,9 @@ import type { ChildProfile } from '@/contexts/AppContext';
 import { Plus, Heart, ChevronRight } from 'lucide-react';
 
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
+const BABY_BOY_IMG = '/manus-storage/baby-profile_5cea21a3.png';
+const BABY_GIRL_IMG = '/manus-storage/baby-girl-profile_d6c9f828.png';
+const BABY_HERO_IMG = '/manus-storage/baby-hero_463105f2.png';
 
 function getAge(birthDate: string, language: string): string {
   const birth = new Date(birthDate);
@@ -32,27 +35,14 @@ function getAge(birthDate: string, language: string): string {
 
 function ChildAvatar({ child, size = 80 }: { child: ChildProfile; size?: number }) {
   const isGirl = child.gender === 'girl';
-  if (child.photoUrl) {
-    return (
-      <img
-        src={child.photoUrl}
-        alt={child.name}
-        className="rounded-full object-cover border-4 border-white shadow-lg"
-        style={{ width: size, height: size }}
-      />
-    );
-  }
-  const gradient = isGirl
-    ? 'linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)'
-    : 'linear-gradient(135deg, #B3E5FC 0%, #4FC3F7 100%)';
-  const emoji = isGirl ? '👧' : '👦';
+  const avatarSrc = child.photoUrl ? child.photoUrl : (isGirl ? BABY_GIRL_IMG : BABY_BOY_IMG);
   return (
-    <div
-      className="rounded-full flex items-center justify-center border-4 border-white shadow-lg"
-      style={{ width: size, height: size, background: gradient, fontSize: size * 0.45 }}
-    >
-      {emoji}
-    </div>
+    <img
+      src={avatarSrc}
+      alt={child.name}
+      className="rounded-3xl object-cover border-3 border-white shadow-lg"
+      style={{ width: size, height: size, borderWidth: '3px', borderStyle: 'solid', borderColor: 'white' }}
+    />
   );
 }
 
@@ -176,10 +166,10 @@ export default function ChildSelector() {
           /* Empty state */
           <div className="flex flex-col items-center justify-center text-center py-8 space-y-5">
             <div
-              className="w-32 h-32 rounded-full flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #B3E5FC 0%, #F8BBD0 100%)' }}
+              className="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden"
+              style={{ background: 'linear-gradient(135deg, #E3F2FD, #FCE4EC)' }}
             >
-              <span style={{ fontSize: 60 }}>👶</span>
+              <img src={BABY_HERO_IMG} alt="Baby" className="w-full h-full object-contain" />
             </div>
             <div>
               <h2 className="text-xl font-extrabold text-gray-800">{noChildTitle}</h2>

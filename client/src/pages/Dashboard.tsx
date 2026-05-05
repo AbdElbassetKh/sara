@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
+const BABY_BOY_IMG = '/manus-storage/baby-profile_5cea21a3.png';
+const BABY_GIRL_IMG = '/manus-storage/baby-girl-profile_d6c9f828.png';
 
 function NextAppointmentWidget() {
   const { language } = useLanguage();
@@ -63,9 +65,9 @@ function ChildAvatar({ size = 52 }: { size?: number }) {
   if (!selectedChild) return null;
 
   const isGirl = selectedChild.gender === 'girl';
-  const gradient = isGirl
-    ? 'linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)'
-    : 'linear-gradient(135deg, #B3E5FC 0%, #4FC3F7 100%)';
+  const avatarSrc = selectedChild.photoUrl
+    ? selectedChild.photoUrl
+    : (isGirl ? BABY_GIRL_IMG : BABY_BOY_IMG);
 
   return (
     <button
@@ -73,21 +75,12 @@ function ChildAvatar({ size = 52 }: { size?: number }) {
       className="relative flex-shrink-0"
       title={selectedChild.name}
     >
-      {selectedChild.photoUrl ? (
-        <img
-          src={selectedChild.photoUrl}
-          alt={selectedChild.name}
-          className="rounded-full object-cover border-3 border-white/60 shadow-md"
-          style={{ width: size, height: size }}
-        />
-      ) : (
-        <div
-          className="rounded-full flex items-center justify-center border-3 border-white/60 shadow-md"
-          style={{ width: size, height: size, background: gradient, fontSize: size * 0.45 }}
-        >
-          {isGirl ? '👧' : '👦'}
-        </div>
-      )}
+      <img
+        src={avatarSrc}
+        alt={selectedChild.name}
+        className="rounded-full object-cover shadow-md"
+        style={{ width: size, height: size, border: '3px solid rgba(255,255,255,0.7)' }}
+      />
       <div
         className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-white flex items-center justify-center shadow"
         style={{ border: '1.5px solid #E0E0E0' }}

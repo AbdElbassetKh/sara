@@ -7,11 +7,15 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ALLERGEN_LIST, FEEDING_TYPES, GENDER_OPTIONS } from '@/const';
-import { Upload, ArrowRight } from 'lucide-react';
+import { Upload, ArrowRight, ChevronLeft } from 'lucide-react';
+import { useLocation } from 'wouter';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+const BABY_HERO_IMG = '/manus-storage/baby-hero_463105f2.png';
 
 export default function ChildProfileSetup() {
   const { t, language } = useLanguage();
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     name: '',
     birthDate: '',
@@ -88,20 +92,67 @@ export default function ChildProfileSetup() {
     return map[allergen] || allergen;
   };
 
+  const isAr = language === 'ar';
+  const isFr = language === 'fr';
+
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="max-w-md mx-auto p-4 space-y-5">
-        {/* Header */}
-        <div className="pt-2 space-y-1">
-          <h1 className="text-2xl font-bold text-foreground">{t('createProfile')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {language === 'fr' ? "Aidez-nous à mieux connaître votre enfant" : language === 'ar' ? 'ساعدنا على التعرف على طفلك بشكل أفضل' : "Help us know your child better"}
+    <div
+      className="min-h-screen pb-20"
+      style={{ background: '#F0F7FF', fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+      dir={isAr ? 'rtl' : 'ltr'}
+    >
+      {/* Hero Header */}
+      <div
+        className="relative overflow-hidden flex items-end justify-between px-5 pt-10 pb-0"
+        style={{
+          background: 'linear-gradient(135deg, #F8BBD0 0%, #F48FB1 50%, #4FC3F7 100%)',
+          borderBottomLeftRadius: '40px',
+          borderBottomRightRadius: '40px',
+          boxShadow: '0 12px 40px rgba(244,143,177,0.35)',
+          minHeight: '200px',
+        }}
+      >
+        {/* Blobs */}
+        <div className="absolute top-0 right-0 w-40 h-40 rounded-full opacity-20 pointer-events-none" style={{ background: 'white', transform: 'translate(35%, -35%)' }} />
+        <div className="absolute top-0 left-0 w-28 h-28 rounded-full opacity-15 pointer-events-none" style={{ background: 'white', transform: 'translate(-25%, -25%)' }} />
+
+        {/* Back button */}
+        <button
+          onClick={() => setLocation('/child-select')}
+          className="absolute top-5 left-5 w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center"
+          style={{ backdropFilter: 'blur(8px)' }}
+        >
+          <ChevronLeft size={20} color="white" />
+        </button>
+
+        {/* Text */}
+        <div className="relative z-10 pb-5 flex-1">
+          <h1
+            className="text-2xl font-black text-white leading-tight"
+            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.15)' }}
+          >
+            {isAr ? 'معلومات طفلي' : isFr ? 'Profil de mon enfant' : 'My Child\'s Profile'}
+          </h1>
+          <p className="text-white/85 text-sm font-medium mt-1">
+            {isAr ? 'ساعدنا على التعرف على طفلك' : isFr ? 'Aidez-nous à connaître votre enfant' : 'Help us know your child better'}
           </p>
-          {/* Signature officielle */}
-          <p className="text-[11px] font-medium italic text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-pink-500 pt-1">
-            {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'}
+          <p className="text-white/70 text-xs font-medium italic mt-1">
+            ✨ {isAr ? 'لأن كل بكاء طفلك له سبب' : isFr ? 'Parce que chaque pleur a une cause' : 'Because every cry has a cause'} ✨
           </p>
         </div>
+
+        {/* Baby illustration */}
+        <div className="relative z-10 flex-shrink-0" style={{ height: '160px', width: '130px' }}>
+          <img
+            src={BABY_HERO_IMG}
+            alt="Baby"
+            className="absolute bottom-0 right-0 object-contain"
+            style={{ height: '155px', filter: 'drop-shadow(0 8px 20px rgba(0,0,0,0.12))' }}
+          />
+        </div>
+      </div>
+
+      <div className="max-w-md mx-auto px-4 pt-5 space-y-4">
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Photo Upload */}
@@ -219,14 +270,18 @@ export default function ChildProfileSetup() {
           </Card>
 
           {/* Submit Button */}
-          <Button
+          <button
             type="submit"
             disabled={!formData.name || !formData.birthDate || !formData.gender || isLoading}
-            className="w-full h-12 text-base font-semibold gap-2 rounded-xl"
+            className="w-full h-14 text-white text-base font-bold rounded-3xl flex items-center justify-center gap-3 transition-all active:scale-[0.97] disabled:opacity-50"
+            style={{
+              background: 'linear-gradient(135deg, #4FC3F7 0%, #0288D1 100%)',
+              boxShadow: '0 8px 24px rgba(79,195,247,0.45)',
+            }}
           >
-            {isLoading ? t('saving') : t('saveProfile')}
-            {!isLoading && <ArrowRight size={18} />}
-          </Button>
+            {isLoading ? (isAr ? 'جاري الحفظ...' : isFr ? 'Enregistrement...' : 'Saving...') : (isAr ? 'حفظ ومتابعة' : isFr ? 'Enregistrer le profil' : 'Save Profile')}
+            {!isLoading && <ArrowRight size={20} />}
+          </button>
 
           {/* Footer Signature */}
           <div className="text-center pb-2">
