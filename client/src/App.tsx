@@ -4,36 +4,71 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import { LanguageProvider } from "./contexts/LanguageContext";
+import { AppProvider } from "./contexts/AppContext";
+import Onboarding from "./pages/Onboarding";
+import ChildProfileSetup from "./pages/ChildProfileSetup";
+import Dashboard from "./pages/Dashboard";
+import BottomNavigation from "./components/BottomNavigation";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Suspense, lazy } from "react";
+
+const Meals = lazy(() => import('./pages/Meals'));
+const EmergencyPage = lazy(() => import('./pages/EmergencyPage'));
+const Advice = lazy(() => import('./pages/Advice'));
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Switch>
+        <Route path="/" component={Onboarding} />
+        <Route component={Onboarding} />
+      </Switch>
+    );
+  }
+
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <div className="mobile-container">
+      <Suspense fallback={<div className="p-4 pb-24">Loading...</div>}>
+        <Switch>
+          <Route path="/setup" component={ChildProfileSetup} />
+          <Route path="/" component={Dashboard} />
+          <Route path="/meals" component={Meals} />
+          <Route path="/emergency" component={EmergencyPage} />
+          <Route path="/advice" component={Advice} />
+          <Route path="/timeline" component={() => <div className="p-4 pb-24">Timeline</div>} />
+          <Route path="/insights" component={() => <div className="p-4 pb-24">Insights</div>} />
+          <Route path="/settings" component={() => <div className="p-4 pb-24">Settings</div>} />
+          <Route component={NotFound} />
+        </Switch>
+      </Suspense>
+      <BottomNavigation />
+    </div>
   );
 }
-
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
+      <ThemeProvider defaultTheme="light">
+        <LanguageProvider>
+          <AppProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </AppProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

@@ -1,0 +1,97 @@
+# AlleNest – Child Safety AI - TODO
+
+## Phase 1 : Configuration et Structure de Base
+- [x] Configurer les dépendances et polices (Poppins, Tajawal)
+- [x] Configurer Tailwind CSS avec palette de couleurs personnalisée
+- [x] Configurer i18next pour multilingue (EN, FR, AR avec RTL)
+- [x] Configurer Zustand pour gestion d'état global
+- [x] Créer la structure des pages et navigation
+
+## Phase 2 : Schéma Base de Données
+- [x] Créer les tables Drizzle (profiles, children, food_entries, symptom_entries, doctor_visits, prescriptions, growth_records, vaccines, child_vaccines, documents)
+- [x] Générer et appliquer les migrations SQL
+- [x] Créer les helpers de requête dans server/db.ts
+
+## Phase 3 : Authentification et Onboarding
+- [x] Implémenter l'écran de bienvenue avec sélection de langue
+- [x] Implémenter la page de connexion/inscription (Supabase Auth simulée)
+- [x] Implémenter la création du profil enfant (nom, âge, allergies, photo)
+- [x] Implémenter la redirection post-connexion
+
+## Phase 4 : Tableau de Bord Principal
+- [x] Créer la barre de navigation inférieure (5 icônes)
+- [x] Implémenter le dashboard avec statistiques de santé
+- [x] Afficher les alertes actives et la chronologie des activités
+- [x] Créer les cartes d'actions rapides
+
+## Phase 5 : Journal des Repas avec IA
+- [x] Implémenter l'interface de suivi des repas (grille d'aliments, recherche)
+- [x] Intégrer l'analyse LLM pour détection d'allergènes
+- [x] Afficher les alertes d'allergènes potentiels
+- [ ] Permettre l'upload de photos des repas
+- [x] Sauvegarder les entrées de repas en base de données
+
+## Phase 6 : Suivi des Symptômes
+- [ ] Implémenter l'interface de suivi des symptômes (grille, curseur de sévérité)
+- [ ] Créer le système de corrélation symptômes-repas
+- [ ] Afficher l'historique des symptômes
+- [ ] Permettre l'upload de photos et notes
+
+## Phase 7 : Chronologie et Filtres
+- [ ] Implémenter la page Timeline avec filtres (mois, type)
+- [ ] Afficher les entrées chronologiques avec badges colorés
+- [ ] Permettre la modification et suppression des entrées
+
+## Phase 8 : Insights IA et Rapports
+- [ ] Implémenter l'appel LLM pour analyse des 30 derniers jours
+- [ ] Afficher le niveau de risque et aliments probables
+- [ ] Créer le graphique de consommation vs symptômes
+- [ ] Implémenter l'export PDF des rapports
+- [ ] Ajouter les recommandations personnalisées
+
+## Phase 9 : Suivi de Croissance
+- [ ] Implémenter l'enregistrement des mesures (poids, taille, périmètre crânien)
+- [ ] Créer les graphiques de courbes de percentiles (Recharts)
+- [ ] Afficher les statistiques de croissance
+
+## Phase 10 : Carnet de Vaccination
+- [ ] Implémenter la liste des vaccins avec statuts
+- [ ] Créer le système de rappels (notifications locales)
+- [ ] Afficher le prochain vaccin à faire
+
+## Phase 11 : Suivi Médecin et Documents
+- [ ] Implémenter la gestion des visites médicales
+- [ ] Créer l'upload et stockage des prescriptions/documents
+- [ ] Afficher l'historique des visites et prescriptions
+
+## Phase 12 : Page d'Urgence
+- [ ] Implémenter la page d'urgence (fond rouge, signes de danger)
+- [ ] Ajouter les boutons d'appel (14, 17, personnalisé)
+- [ ] Afficher les protocoles de premiers secours
+
+## Phase 13 : Centre de Conseils
+- [ ] Créer la liste d'articles (au moins 6)
+- [ ] Implémenter les filtres par catégorie
+- [ ] Ajouter la barre de recherche
+- [ ] Créer les modales d'affichage des articles
+
+## Phase 14 : Notifications et Rappels
+- [ ] Implémenter le système de notifications
+- [ ] Créer les rappels de vaccins
+- [ ] Créer les rappels de médicaments
+- [ ] Créer les alertes de symptômes inhabituels
+- [ ] Afficher le centre de notifications
+
+## Phase 15 : Paramètres et Profil
+- [ ] Implémenter la modification du profil enfant
+- [ ] Créer le sélecteur de langue en temps réel
+- [ ] Ajouter les préférences de notifications
+- [ ] Implémenter l'export des données (JSON/CSV)
+- [ ] Ajouter la suppression du compte
+
+## Phase 16 : Finalisation et Tests
+- [ ] Tester tous les flux utilisateur
+- [ ] Valider la responsivité mobile
+- [ ] Vérifier l'accessibilité
+- [ ] Créer les tests Vitest
+- [ ] Optimiser les performances

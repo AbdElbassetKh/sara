@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { decimal, int, mysqlEnum, mysqlTable, text, timestamp, varchar, json, date } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -25,4 +25,161 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+// Children profiles
+export const children = mysqlTable("children", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  birthDate: date("birthDate").notNull(),
+  gender: mysqlEnum("gender", ["boy", "girl"]).notNull(),
+  feedingType: mysqlEnum("feedingType", ["breast", "formula", "mixed", "solids"]),
+  allergies: json("allergies").$type<string[]>().default([]),
+  bloodType: varchar("bloodType", { length: 10 }),
+  emergencyContact: json("emergencyContact").$type<{ name: string; phone: string }>(),
+  photoUrl: text("photoUrl"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Child = typeof children.$inferSelect;
+export type InsertChild = typeof children.$inferInsert;
+
+// Food entries
+export const foodEntries = mysqlTable("food_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  foodName: varchar("foodName", { length: 255 }).notNull(),
+  ingredients: json("ingredients").$type<string[]>().default([]),
+  amount: decimal("amount", { precision: 10, scale: 2 }),
+  unit: varchar("unit", { length: 50 }),
+  eatenAt: timestamp("eatenAt").notNull(),
+  notes: text("notes"),
+  photoUrl: text("photoUrl"),
+  aiAnalysis: json("aiAnalysis").$type<{ allergens: string[]; riskLevel: string; confidence: number }>(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FoodEntry = typeof foodEntries.$inferSelect;
+export type InsertFoodEntry = typeof foodEntries.$inferInsert;
+
+// Symptom entries
+export const symptomEntries = mysqlTable("symptom_entries", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  foodEntryId: int("foodEntryId"),
+  symptomType: varchar("symptomType", { length: 100 }).notNull(),
+  severity: int("severity").notNull(), // 1-10
+  occurredAt: timestamp("occurredAt").notNull(),
+  notes: text("notes"),
+  photoUrl: text("photoUrl"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SymptomEntry = typeof symptomEntries.$inferSelect;
+export type InsertSymptomEntry = typeof symptomEntries.$inferInsert;
+
+// Doctor visits
+export const doctorVisits = mysqlTable("doctor_visits", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  doctorName: varchar("doctorName", { length: 255 }).notNull(),
+  specialty: varchar("specialty", { length: 100 }),
+  visitDate: date("visitDate").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DoctorVisit = typeof doctorVisits.$inferSelect;
+export type InsertDoctorVisit = typeof doctorVisits.$inferInsert;
+
+// Prescriptions
+export const prescriptions = mysqlTable("prescriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  doctorVisitId: int("doctorVisitId"),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileUrl: text("fileUrl").notNull(),
+  fileKey: varchar("fileKey", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Prescription = typeof prescriptions.$inferSelect;
+export type InsertPrescription = typeof prescriptions.$inferInsert;
+
+// Growth records
+export const growthRecords = mysqlTable("growth_records", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  recordDate: date("recordDate").notNull(),
+  weightKg: decimal("weightKg", { precision: 5, scale: 2 }),
+  heightCm: decimal("heightCm", { precision: 5, scale: 2 }),
+  headCircCm: decimal("headCircCm", { precision: 5, scale: 2 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type GrowthRecord = typeof growthRecords.$inferSelect;
+export type InsertGrowthRecord = typeof growthRecords.$inferInsert;
+
+// Vaccines reference
+export const vaccines = mysqlTable("vaccines", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  dueMonth: int("dueMonth").notNull(),
+  description: text("description"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Vaccine = typeof vaccines.$inferSelect;
+export type InsertVaccine = typeof vaccines.$inferInsert;
+
+// Child vaccines status
+export const childVaccines = mysqlTable("child_vaccines", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  vaccineId: int("vaccineId").notNull(),
+  status: mysqlEnum("status", ["pending", "scheduled", "done", "delayed"]).default("pending"),
+  scheduledDate: date("scheduledDate"),
+  doneDate: date("doneDate"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ChildVaccine = typeof childVaccines.$inferSelect;
+export type InsertChildVaccine = typeof childVaccines.$inferInsert;
+
+// Medical documents
+export const medicalDocuments = mysqlTable("medical_documents", {
+  id: int("id").autoincrement().primaryKey(),
+  childId: int("childId").notNull(),
+  documentType: mysqlEnum("documentType", ["prescription", "lab_result", "health_card", "vaccination_card", "other"]).notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  fileUrl: text("fileUrl").notNull(),
+  fileKey: varchar("fileKey", { length: 255 }).notNull(),
+  uploadedAt: date("uploadedAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MedicalDocument = typeof medicalDocuments.$inferSelect;
+export type InsertMedicalDocument = typeof medicalDocuments.$inferInsert;
+
+// Notifications
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  childId: int("childId").notNull(),
+  type: mysqlEnum("type", ["vaccine_reminder", "medication_reminder", "appointment_reminder", "symptom_alert", "allergen_alert", "other"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  content: text("content"),
+  isRead: int("isRead").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
