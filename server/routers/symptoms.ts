@@ -18,6 +18,7 @@ export const symptomsRouter = router({
         notes: z.string().optional(),
         foodEntryId: z.number().optional(),
         photoUrl: z.string().optional(),
+        occurredAt: z.string().optional(), // ISO datetime string
       })
     )
     .mutation(async ({ input }) => {
@@ -26,7 +27,7 @@ export const symptomsRouter = router({
         symptomType: input.symptomType,
         severity: input.severity,
         notes: input.notes,
-        occurredAt: new Date(),
+        occurredAt: input.occurredAt ? new Date(input.occurredAt) : new Date(),
         foodEntryId: input.foodEntryId,
         photoUrl: input.photoUrl,
       });

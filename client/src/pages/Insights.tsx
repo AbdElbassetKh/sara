@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { trpc } from '@/lib/trpc';
 import { useAppContext } from '@/contexts/AppContext';
@@ -125,6 +125,11 @@ export default function Insights() {
   const [showAdvice, setShowAdvice] = useState(false);
   const [activeChart, setActiveChart] = useState<'timeline' | 'frequency' | 'heatmap'>('timeline');
 
+  // ── Chat IA ──────────────────────────────────────────────────────────────────
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
   // ── Base queries ─────────────────────────────────────────────────────────────
   const { data: meals = [] }    = trpc.meals.list.useQuery({ childId }, { enabled: childId > 0 });
   const { data: symptoms = [] } = trpc.symptoms.list.useQuery({ childId }, { enabled: childId > 0 });
@@ -144,11 +149,31 @@ export default function Insights() {
     { enabled: childId > 0, retry: false }
   );
 
-  // ── AI mutation ───────────────────────────────────────────────────────────────
+  // ── A  // ── AI mutation ────────────────────────────────────────────────
   const aiMutation = trpc.insights.analyzeWithAI.useMutation({
     onError: (err) => toast.error(err.message || t('Erreur IA', 'خطأ في الذكاء الاصطناعي', 'AI error')),
   });
   const aiResult = aiMutation.data;
+
+  // ── Chat IA mutation ────────────────────────────────────────────────
+  const chatMutation = trpc.insights.chat.useMutation({
+    onSuccess: (data) => {
+      setChatMessages(prev => [...prev, { role: 'assistant' as const, text: String(data.answer) }]);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    },
+    onError: (err) => {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: t('Désolé, une erreur est survenue. Veuillez réessayer.', 'عذراً، حدث خطأ. يرجى المحاولة مرة أخرى.', 'Sorry, an error occurred. Please try again.') }]);
+    },
+  });
+
+  const handleChatSend = () => {
+    const q = chatInput.trim();
+    if (!q || !childId || chatMutation.isPending) return;
+    setChatMessages(prev => [...prev, { role: 'user', text: q }]);
+    setChatInput('');
+    chatMutation.mutate({ childId, question: q, language: language as 'ar' | 'fr' | 'en' });
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
 
   // ── Stat cards ────────────────────────────────────────────────────────────────
   const STAT_CARDS = [
@@ -620,6 +645,99 @@ export default function Insights() {
               </div>
             );
           })}
+        </div>
+
+        {/* ── Chat IA ── */}
+        <div className="p-5 rounded-3xl bg-white space-y-4" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #F1F5F9' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${C.primary}, #0288D1)`, boxShadow: `0 4px 12px rgba(79,195,247,0.4)` }}>
+              <Brain size={18} color="white" />
+            </div>
+            <div>
+              <p className="text-sm font-extrabold text-gray-800">
+                {isAr ? 'اسأل الذكاء الاصطناعي' : isFr ? 'Poser une question à l\'IA' : 'Ask the AI'}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {isAr ? 'اسأل عن بيانات طفلك بلغتك الخاصة' : isFr ? 'Posez des questions sur les données de votre enfant' : 'Ask questions about your child\'s data'}
+              </p>
+            </div>
+          </div>
+
+          {/* Messages */}
+          {chatMessages.length > 0 && (
+            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div
+                    className="max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed"
+                    style={msg.role === 'user'
+                      ? { background: `linear-gradient(135deg, ${C.primary}, #0288D1)`, color: 'white', borderBottomRightRadius: '6px' }
+                      : { background: '#F8FAFC', color: '#374151', border: '1px solid #E2E8F0', borderBottomLeftRadius: '6px' }}
+                    dir={isAr ? 'rtl' : 'ltr'}
+                  >
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              {chatMutation.isPending && (
+                <div className="flex justify-start">
+                  <div className="px-4 py-3 rounded-2xl text-sm" style={{ background: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                    <div className="flex gap-1 items-center">
+                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+          )}
+
+          {/* Suggested questions */}
+          {chatMessages.length === 0 && (
+            <div className="flex flex-wrap gap-2">
+              {[
+                isAr ? 'ما هي الأطعمة التي تسبب أكثر الأعراض؟' : isFr ? 'Quels aliments causent le plus de symptômes ?' : 'Which foods cause the most symptoms?',
+                isAr ? 'هل هناك نمط متكرر في الأعراض؟' : isFr ? 'Y a-t-il un schéma récurrent dans les symptômes ?' : 'Is there a recurring symptom pattern?',
+                isAr ? 'ما هي الأعراض الأكثر شيوعاً؟' : isFr ? 'Quels sont les symptômes les plus fréquents ?' : 'What are the most common symptoms?',
+              ].map((q, i) => (
+                <button
+                  key={i}
+                  onClick={() => { setChatInput(q); }}
+                  className="text-xs px-3 py-1.5 rounded-full border transition-all hover:shadow-sm"
+                  style={{ background: '#F0F9FF', border: `1px solid ${C.primary}`, color: '#0288D1' }}
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleChatSend()}
+              placeholder={isAr ? 'اكتب سؤالك هنا...' : isFr ? 'Écrivez votre question ici...' : 'Type your question here...'}
+              disabled={chatMutation.isPending || !childId}
+              className="flex-1 text-sm px-4 py-3 rounded-2xl border border-gray-200 bg-gray-50 outline-none focus:border-blue-300 transition-colors disabled:opacity-50"
+              dir={isAr ? 'rtl' : 'ltr'}
+            />
+            <button
+              onClick={handleChatSend}
+              disabled={!chatInput.trim() || chatMutation.isPending || !childId}
+              className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all active:scale-95 disabled:opacity-40"
+              style={{ background: `linear-gradient(135deg, ${C.primary}, #0288D1)`, boxShadow: `0 4px 12px rgba(79,195,247,0.4)` }}
+            >
+              {chatMutation.isPending
+                ? <Loader2 size={16} color="white" className="animate-spin" />
+                : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              }
+            </button>
+          </div>
         </div>
 
         {/* ── Disclaimer ── */}

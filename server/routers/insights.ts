@@ -295,4 +295,72 @@ export const insightsRouter = router({
 
       return { foods: topFoods, symptoms: topSymptoms, matrix };
     }),
+
+  // ─── 4. NATURAL LANGUAGE CHAT ─────────────────────────────────────────────
+  /**
+   * The user asks a question in natural language (any language).
+   * The LLM answers based on the child's last 30 days of data.
+   * Always responds in the same language as the question.
+   */
+  chat: protectedProcedure
+    .input(z.object({
+      childId: z.number(),
+      question: z.string().min(1).max(500),
+      language: z.enum(['ar', 'fr', 'en']).default('ar'),
+    }))
+    .mutation(async ({ input }) => {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const [child, meals, symptoms] = await Promise.all([
+        getChildById(input.childId),
+        getFoodEntriesByChildId(input.childId, 200),
+        getSymptomEntriesByChildId(input.childId, 200),
+      ]);
+
+      if (!child) throw new Error('Child not found');
+
+      // Filter to last 30 days
+      const recentMeals = meals.filter(m => new Date(m.eatenAt) >= since);
+      const recentSymptoms = symptoms.filter(s => new Date(s.occurredAt) >= since);
+
+      // Build concise data summary
+      const mealSummary = recentMeals.slice(0, 50).map(m => {
+        const date = new Date(m.eatenAt).toLocaleDateString();
+        const ingredients = Array.isArray(m.ingredients) ? m.ingredients.join(', ') : m.foodName;
+        return `${date}: ${ingredients}`;
+      }).join('\n');
+
+      const symptomSummary = recentSymptoms.slice(0, 50).map(s => {
+        const date = new Date(s.occurredAt).toLocaleDateString();
+        return `${date}: ${s.symptomType} (severity ${s.severity}/10)`;
+      }).join('\n');
+
+      const langInstruction = input.language === 'ar'
+        ? 'Respond in Arabic (العربية). Be concise and use simple words suitable for parents.'
+        : input.language === 'fr'
+        ? 'Respond in French. Be concise and use simple words suitable for parents.'
+        : 'Respond in English. Be concise and use simple words suitable for parents.';
+
+      const systemPrompt = `You are a helpful pediatric nutrition assistant for the AlleNest app. You help parents understand their child's food allergies and symptoms.
+
+Child: ${child.name}, ${ageInMonths(new Date(child.birthDate))} months old.
+
+Recent meals (last 30 days):
+${mealSummary || 'No meals recorded'}
+
+Recent symptoms (last 30 days):
+${symptomSummary || 'No symptoms recorded'}
+
+${langInstruction}
+IMPORTANT: Always remind parents to consult a doctor for medical decisions. Do not diagnose.`;
+
+      const response = await invokeLLM({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: input.question },
+        ],
+      });
+
+      const answer = response.choices?.[0]?.message?.content ?? '';
+      return { answer };
+    }),
 });

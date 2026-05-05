@@ -235,3 +235,13 @@
 - [x] Graphique 3 : Heatmap aliment × symptôme (code couleur vert→rouge)
 - [x] Sélecteur de période (7j / 14j / 30j) et onglets de graphiques
 - [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 31 : Upload photo + Catégories aliments + Chat IA + Symptômes améliorés
+
+- [x] Migration DB : tables food_categories, food_items, symptom_types créées (6 catégories, 32 aliments, 20 symptômes)
+- [x] Routeur tRPC `foodCatalog` : listCategories, listItems, listSymptomTypes
+- [x] Formulaire Repas : catégories depuis DB, recherche, multi-sélection, upload photo (5 Mo max)
+- [x] Formulaire Symptômes : grille icônes depuis DB, filtre par catégorie, multi-sélection, heure d'apparition, upload photo
+- [x] `symptoms.create` : ajout du champ `occurredAt` optionnel
+- [x] Chat IA dans Insights : procédure `insights.chat`, 3 questions suggérées, bulles de chat, réponse en AR/FR/EN, animation typing
+- [x] 0 erreur TypeScript · 21 tests passants

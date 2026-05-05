@@ -264,3 +264,43 @@ export const appointments = mysqlTable("appointments", {
 
 export type Appointment = typeof appointments.$inferSelect;
 export type InsertAppointment = typeof appointments.$inferInsert;
+
+// Food categories (for the meal form tabs)
+export const foodCategories = mysqlTable("food_categories", {
+  id: int("id").autoincrement().primaryKey(),
+  nameAr: varchar("nameAr", { length: 100 }).notNull(),
+  nameFr: varchar("nameFr", { length: 100 }).notNull(),
+  nameEn: varchar("nameEn", { length: 100 }).notNull(),
+  icon: varchar("icon", { length: 10 }).notNull(),
+  sortOrder: int("sortOrder").default(0),
+});
+
+export type FoodCategory = typeof foodCategories.$inferSelect;
+export type InsertFoodCategory = typeof foodCategories.$inferInsert;
+
+// Food items per category
+export const foodItems = mysqlTable("food_items", {
+  id: int("id").autoincrement().primaryKey(),
+  categoryId: int("categoryId").notNull(),
+  nameAr: varchar("nameAr", { length: 100 }).notNull(),
+  nameFr: varchar("nameFr", { length: 100 }).notNull(),
+  nameEn: varchar("nameEn", { length: 100 }).notNull(),
+  icon: varchar("icon", { length: 10 }).notNull(),
+  isCommonAllergen: int("isCommonAllergen").default(0),
+});
+
+export type FoodItem = typeof foodItems.$inferSelect;
+export type InsertFoodItem = typeof foodItems.$inferInsert;
+
+// Symptom types reference
+export const symptomTypes = mysqlTable("symptom_types", {
+  id: int("id").autoincrement().primaryKey(),
+  nameAr: varchar("nameAr", { length: 100 }).notNull(),
+  nameFr: varchar("nameFr", { length: 100 }).notNull(),
+  nameEn: varchar("nameEn", { length: 100 }).notNull(),
+  icon: varchar("icon", { length: 10 }).notNull(),
+  category: mysqlEnum("category", ["skin", "digestive", "respiratory", "neurological", "other"]).default("other"),
+});
+
+export type SymptomType = typeof symptomTypes.$inferSelect;
+export type InsertSymptomType = typeof symptomTypes.$inferInsert;

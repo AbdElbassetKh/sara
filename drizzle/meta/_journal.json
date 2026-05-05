@@ -29,6 +29,13 @@
       "when": 1777980039087,
       "tag": "0003_rare_gideon",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1778003291649,
+      "tag": "0004_neat_gamora",
+      "breakpoints": true
     }
   ]
 }
