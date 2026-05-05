@@ -167,3 +167,12 @@
 - [x] Persister le choix de l'enfant dans AppContext (selectedChild)
 - [x] Traductions FR/EN/AR complètes
 - [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 25 : Refonte design (style référence)
+- [x] Polices Tajawal (AR) + Poppins (FR/EN) via Google Fonts dans index.html
+- [x] Palette couleurs : #4FC3F7 (bleu ciel), #F8BBD0 (rose), #F9FAFB (fond), #EF5350 (urgence)
+- [x] CSS variables globales + tokens Tailwind dans index.css
+- [x] Refonte BottomNavigation : icônes colorées avec gradient actif, badge notifications
+- [x] Refonte Dashboard : header gradient arrondi, cartes arrondies, quick actions avec gradients
+- [x] Refonte ChildSelector : avatars emoji, cartes douces, boutons colorés
+- [x] 0 erreur TypeScript · 21 tests passants

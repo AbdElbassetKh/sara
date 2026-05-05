@@ -4,8 +4,7 @@ import { trpc } from '@/lib/trpc';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAppContext } from '@/contexts/AppContext';
 import type { ChildProfile } from '@/contexts/AppContext';
-import { Baby, Plus, ChevronRight, Sparkles, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Plus, Heart, ChevronRight } from 'lucide-react';
 
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
@@ -31,23 +30,28 @@ function getAge(birthDate: string, language: string): string {
   return rem > 0 ? `${years}y ${rem}m` : `${years} year${years !== 1 ? 's' : ''}`;
 }
 
-function ChildAvatar({ child, size = 'lg' }: { child: ChildProfile; size?: 'sm' | 'lg' }) {
-  const dim = size === 'lg' ? 'w-24 h-24' : 'w-16 h-16';
-  const textSize = size === 'lg' ? 'text-3xl' : 'text-xl';
-  const bg = child.gender === 'girl' ? 'from-pink-400 to-rose-400' : 'from-sky-400 to-blue-500';
-
+function ChildAvatar({ child, size = 80 }: { child: ChildProfile; size?: number }) {
+  const isGirl = child.gender === 'girl';
   if (child.photoUrl) {
     return (
       <img
         src={child.photoUrl}
         alt={child.name}
-        className={`${dim} rounded-full object-cover border-4 border-white shadow-lg`}
+        className="rounded-full object-cover border-4 border-white shadow-lg"
+        style={{ width: size, height: size }}
       />
     );
   }
+  const gradient = isGirl
+    ? 'linear-gradient(135deg, #F8BBD0 0%, #F48FB1 100%)'
+    : 'linear-gradient(135deg, #B3E5FC 0%, #4FC3F7 100%)';
+  const emoji = isGirl ? '👧' : '👦';
   return (
-    <div className={`${dim} rounded-full bg-gradient-to-br ${bg} flex items-center justify-center border-4 border-white shadow-lg`}>
-      <span className={textSize}>{child.gender === 'girl' ? '👧' : '👦'}</span>
+    <div
+      className="rounded-full flex items-center justify-center border-4 border-white shadow-lg"
+      style={{ width: size, height: size, background: gradient, fontSize: size * 0.45 }}
+    >
+      {emoji}
     </div>
   );
 }
@@ -59,7 +63,6 @@ export default function ChildSelector() {
 
   const { data: childrenData = [], isLoading } = trpc.children.list.useQuery();
 
-  // Sync children list into AppContext
   useEffect(() => {
     if (childrenData.length > 0) {
       const mapped: ChildProfile[] = childrenData.map((c: any) => ({
@@ -79,65 +82,124 @@ export default function ChildSelector() {
     setLocation('/');
   };
 
-  const handleAddChild = () => {
-    setLocation('/setup');
-  };
+  const isAr = language === 'ar';
+  const isFr = language === 'fr';
 
-  const title = language === 'ar' ? 'مرحباً بك في AlleNest' : language === 'fr' ? 'Bienvenue sur AlleNest' : 'Welcome to AlleNest';
-  const subtitle = language === 'ar' ? 'اختر طفلك للمتابعة' : language === 'fr' ? 'Choisissez votre enfant pour continuer' : 'Choose your child to continue';
-  const noChildTitle = language === 'ar' ? 'لا يوجد ملف طفل بعد' : language === 'fr' ? 'Aucun profil enfant' : 'No child profile yet';
-  const noChildSub = language === 'ar' ? 'أضف ملف طفلك الأول للبدء' : language === 'fr' ? 'Ajoutez votre premier profil enfant pour commencer' : 'Add your first child profile to get started';
-  const addLabel = language === 'ar' ? 'إضافة طفل جديد' : language === 'fr' ? 'Ajouter un enfant' : 'Add a child';
-  const selectLabel = language === 'ar' ? 'اختر' : language === 'fr' ? 'Choisir' : 'Select';
+  const greeting = isAr
+    ? ['مرحباً أمي 💙', 'مرحباً أبي 💙']
+    : isFr
+    ? ['Bonjour Maman 💙', 'Bonjour Papa 💙']
+    : ['Hello Mum 💙', 'Hello Dad 💙'];
+
+  const tagline = isAr
+    ? 'نحن مع حالة صحة طفلك'
+    : isFr
+    ? 'Nous veillons sur la santé de votre enfant'
+    : 'We care for your child\'s health';
+
+  const title = isAr ? 'اختر طفلك' : isFr ? 'Choisissez votre enfant' : 'Choose your child';
+  const noChildTitle = isAr ? 'لا يوجد ملف طفل بعد' : isFr ? 'Aucun profil enfant' : 'No child profile yet';
+  const noChildSub = isAr ? 'أضف ملف طفلك الأول للبدء' : isFr ? 'Ajoutez votre premier profil enfant' : 'Add your first child profile to get started';
+  const addLabel = isAr ? 'إضافة طفل جديد' : isFr ? 'Ajouter un enfant' : 'Add a child';
+  const addAnotherLabel = isAr ? 'إضافة طفل آخر' : isFr ? 'Ajouter un autre enfant' : 'Add another child';
+  const startLabel = isAr ? 'ابدأ الآن' : isFr ? 'Commencer' : 'Get Started';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-pink-50 flex flex-col">
-      {/* Header */}
-      <div className="page-header-gradient px-6 pt-14 pb-10 text-center relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-28 h-28 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: '#F9FAFB', fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+    >
+      {/* Hero Header */}
+      <div
+        className="relative overflow-hidden px-5 pt-12 pb-8"
+        style={{
+          background: 'linear-gradient(135deg, #4FC3F7 0%, #29B6F6 60%, #B3E5FC 100%)',
+          borderBottomLeftRadius: '32px',
+          borderBottomRightRadius: '32px',
+          boxShadow: '0 8px 32px rgba(79,195,247,0.35)',
+        }}
+      >
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-36 h-36 rounded-full opacity-20" style={{ background: 'white', transform: 'translate(40%, -40%)' }} />
+        <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full opacity-15" style={{ background: 'white', transform: 'translate(-30%, 40%)' }} />
 
-        <img
-          src={LOGO_URL}
-          alt="AlleNest"
-          className="w-20 h-20 rounded-full object-cover border-4 border-white/60 shadow-xl mx-auto mb-4"
-        />
-        <h1 className="text-2xl font-extrabold text-white mb-1">{title}</h1>
-        <p className="text-white/80 text-sm font-medium">
-          {language === 'ar' ? '✨ لأن كل بكاء طفلك له سبب' : language === 'fr' ? '✨ Parce que chaque pleur de votre enfant a une cause' : '✨ Because every cry of your child has a cause'}
-        </p>
+        <div className="relative z-10 text-center">
+          <img
+            src={LOGO_URL}
+            alt="AlleNest"
+            className="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-4 border-white/60"
+            style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.15)' }}
+          />
+          <div className="space-y-0.5 mb-1">
+            {greeting.map((g, i) => (
+              <p key={i} className={`font-extrabold text-white leading-tight ${i === 0 ? 'text-2xl' : 'text-xl opacity-90'}`}
+                style={{ fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}>
+                {g}
+              </p>
+            ))}
+          </div>
+          <p className="text-white/80 text-sm mt-2" style={{ fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}>
+            {tagline}
+          </p>
+
+          {/* Language pills */}
+          <div className="flex items-center justify-center gap-2 mt-4">
+            {[{ code: 'ar', label: 'العربية' }, { code: 'fr', label: 'Français 🇫🇷' }, { code: 'en', label: 'English' }].map(({ code, label }) => (
+              <button
+                key={code}
+                onClick={() => {
+                  const ctx = (window as any).__languageContext;
+                  if (ctx?.setLanguage) ctx.setLanguage(code);
+                  document.documentElement.lang = code;
+                  document.documentElement.dir = code === 'ar' ? 'rtl' : 'ltr';
+                  localStorage.setItem('allenest-language', code);
+                  window.location.reload();
+                }}
+                className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${language === code ? 'bg-white text-sky-600 shadow-md' : 'bg-white/20 text-white hover:bg-white/30'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-5 py-6 max-w-md mx-auto w-full">
+      <div className="flex-1 px-4 py-5 max-w-md mx-auto w-full">
         {isLoading ? (
-          <div className="space-y-4 mt-4">
+          <div className="space-y-4 mt-2">
             {[1, 2].map((i) => (
               <div key={i} className="h-28 bg-white rounded-3xl animate-pulse shadow-sm" />
             ))}
           </div>
         ) : childrenData.length === 0 ? (
           /* Empty state */
-          <div className="flex flex-col items-center justify-center text-center py-10 space-y-5">
-            <div className="w-28 h-28 rounded-full bg-gradient-to-br from-sky-100 to-pink-100 flex items-center justify-center shadow-inner">
-              <Baby className="w-14 h-14 text-sky-400" />
+          <div className="flex flex-col items-center justify-center text-center py-8 space-y-5">
+            <div
+              className="w-32 h-32 rounded-full flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #B3E5FC 0%, #F8BBD0 100%)' }}
+            >
+              <span style={{ fontSize: 60 }}>👶</span>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-foreground">{noChildTitle}</h2>
-              <p className="text-sm text-muted-foreground mt-1 max-w-xs">{noChildSub}</p>
+              <h2 className="text-xl font-extrabold text-gray-800">{noChildTitle}</h2>
+              <p className="text-sm text-gray-500 mt-1 max-w-xs">{noChildSub}</p>
             </div>
-            <Button
-              onClick={handleAddChild}
-              className="w-full max-w-xs h-14 bg-gradient-to-r from-sky-500 to-indigo-500 hover:opacity-90 text-white font-bold text-base rounded-2xl shadow-lg flex items-center gap-3"
+            <button
+              onClick={() => setLocation('/setup')}
+              className="w-full max-w-xs h-14 text-white font-bold text-base rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-95"
+              style={{
+                background: 'linear-gradient(135deg, #4FC3F7 0%, #0288D1 100%)',
+                boxShadow: '0 8px 24px rgba(79,195,247,0.45)',
+              }}
             >
-              <Plus className="w-6 h-6" />
-              {addLabel}
-            </Button>
+              <Plus size={22} />
+              {startLabel}
+            </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            <p className="text-sm font-semibold text-muted-foreground text-center mb-2">{subtitle}</p>
+          <div className="space-y-3">
+            <p className="text-sm font-semibold text-gray-500 text-center mb-3">{title}</p>
 
             {/* Children cards */}
             {childrenData.map((c: any) => {
@@ -157,39 +219,55 @@ export default function ChildSelector() {
                 <button
                   key={child.id}
                   onClick={() => handleSelect(child)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-3xl bg-white shadow-md border-2 transition-all hover:shadow-lg hover:scale-[1.01] active:scale-[0.99] ${isGirl ? 'border-pink-100 hover:border-pink-300' : 'border-sky-100 hover:border-sky-300'}`}
+                  className="w-full flex items-center gap-4 p-4 rounded-3xl bg-white transition-all active:scale-[0.98] hover:shadow-lg"
+                  style={{
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                    border: `2px solid ${isGirl ? '#FCE4EC' : '#E1F5FE'}`,
+                  }}
                 >
-                  {/* Avatar */}
-                  <ChildAvatar child={child} size="lg" />
+                  <ChildAvatar child={child} size={72} />
 
-                  {/* Info */}
                   <div className="flex-1 text-start min-w-0">
-                    <h3 className="text-xl font-extrabold text-foreground truncate">{child.name}</h3>
+                    <h3
+                      className="text-lg font-extrabold text-gray-800 truncate"
+                      style={{ fontFamily: isAr ? "'Tajawal', sans-serif" : "'Poppins', sans-serif" }}
+                    >
+                      {child.name}
+                    </h3>
                     {age && (
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        {language === 'ar' ? `العمر: ${age}` : language === 'fr' ? `Âge : ${age}` : `Age: ${age}`}
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        {isAr ? `العمر: ${age}` : isFr ? `Âge : ${age}` : `Age: ${age}`}
                       </p>
                     )}
-                    {allergyCount > 0 && (
-                      <div className="flex items-center gap-1 mt-1.5">
-                        <span className="text-xs bg-amber-100 text-amber-700 font-semibold px-2 py-0.5 rounded-full">
-                          {allergyCount} {language === 'ar' ? 'حساسية' : language === 'fr' ? `allergie${allergyCount > 1 ? 's' : ''}` : `allergen${allergyCount !== 1 ? 's' : ''}`}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {allergyCount > 0 ? (
+                        <span
+                          className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                          style={{ background: '#FFF3E0', color: '#E65100' }}
+                        >
+                          ⚠️ {allergyCount} {isAr ? 'حساسية' : isFr ? `allergie${allergyCount > 1 ? 's' : ''}` : `allergen${allergyCount !== 1 ? 's' : ''}`}
                         </span>
-                      </div>
-                    )}
-                    {allergyCount === 0 && (
-                      <div className="flex items-center gap-1 mt-1.5">
-                        <Heart className="w-3 h-3 text-green-500" />
-                        <span className="text-xs text-green-600 font-medium">
-                          {language === 'ar' ? 'لا حساسية مسجلة' : language === 'fr' ? 'Aucune allergie' : 'No allergies'}
+                      ) : (
+                        <span
+                          className="text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1"
+                          style={{ background: '#E8F5E9', color: '#2E7D32' }}
+                        >
+                          <Heart size={10} />
+                          {isAr ? 'لا حساسية' : isFr ? 'Aucune allergie' : 'No allergies'}
                         </span>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
 
-                  {/* Arrow */}
-                  <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${isGirl ? 'bg-pink-100' : 'bg-sky-100'}`}>
-                    <ChevronRight className={`w-5 h-5 ${isGirl ? 'text-pink-500' : 'text-sky-500'}`} />
+                  <div
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{
+                      background: isGirl
+                        ? 'linear-gradient(135deg, #F8BBD0, #F48FB1)'
+                        : 'linear-gradient(135deg, #B3E5FC, #4FC3F7)',
+                    }}
+                  >
+                    <ChevronRight size={18} color="white" />
                   </div>
                 </button>
               );
@@ -197,28 +275,29 @@ export default function ChildSelector() {
 
             {/* Add another child */}
             <button
-              onClick={handleAddChild}
-              className="w-full flex items-center gap-4 p-4 rounded-3xl border-2 border-dashed border-primary/30 bg-primary/5 text-primary font-semibold transition-all hover:border-primary/50 hover:bg-primary/10"
+              onClick={() => setLocation('/setup')}
+              className="w-full flex items-center gap-4 p-4 rounded-3xl bg-white transition-all active:scale-[0.98]"
+              style={{
+                border: '2px dashed #B3E5FC',
+                boxShadow: '0 2px 12px rgba(79,195,247,0.08)',
+              }}
             >
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <Plus className="w-10 h-10 text-primary" />
+              <div
+                className="w-[72px] h-[72px] rounded-full flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, #E1F5FE, #B3E5FC)' }}
+              >
+                <Plus size={28} color="#0288D1" />
               </div>
               <div className="flex-1 text-start">
-                <p className="text-base font-bold">{addLabel}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {language === 'ar' ? 'أضف ملف طفل آخر' : language === 'fr' ? 'Ajouter un autre profil' : 'Add another profile'}
-                </p>
+                <p className="text-base font-bold text-sky-600">{addLabel}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{addAnotherLabel}</p>
               </div>
             </button>
 
             {/* Signature */}
-            <div className="text-center pt-2 pb-4">
-              <p className="text-xs text-muted-foreground/60 italic flex items-center justify-center gap-1">
-                <Sparkles className="w-3 h-3" />
-                {language === 'ar' ? 'لأن كل بكاء طفلك له سبب' : language === 'fr' ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'}
-                <Sparkles className="w-3 h-3" />
-              </p>
-            </div>
+            <p className="text-center text-xs text-gray-400 italic pt-2 pb-4">
+              ✨ {isAr ? 'لأن كل بكاء طفلك له سبب' : isFr ? 'Parce que chaque pleur de votre enfant a une cause' : 'Because every cry of your child has a cause'} ✨
+            </p>
           </div>
         )}
       </div>

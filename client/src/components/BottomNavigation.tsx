@@ -1,60 +1,72 @@
 import { Link, useLocation } from 'wouter';
 import { Home, Clock, Sparkles, Bell, Settings } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { trpc } from '@/lib/trpc';
 
 export default function BottomNavigation() {
   const [location] = useLocation();
   const { t } = useLanguage();
+
+  const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
   const NAV_ITEMS = [
     {
       path: '/',
       icon: Home,
       label: t('navHome'),
-      activeColor: 'text-sky-500',
-      activeBg: 'bg-sky-50',
-      dotColor: 'bg-sky-500',
+      activeGradient: 'from-sky-400 to-blue-500',
+      activeShadow: 'rgba(79,195,247,0.45)',
+      inactiveColor: '#9CA3AF',
     },
     {
       path: '/timeline',
       icon: Clock,
       label: t('navTimeline'),
-      activeColor: 'text-violet-500',
-      activeBg: 'bg-violet-50',
-      dotColor: 'bg-violet-500',
+      activeGradient: 'from-violet-400 to-purple-500',
+      activeShadow: 'rgba(139,92,246,0.45)',
+      inactiveColor: '#9CA3AF',
     },
     {
       path: '/insights',
       icon: Sparkles,
       label: t('navInsights'),
-      activeColor: 'text-pink-500',
-      activeBg: 'bg-pink-50',
-      dotColor: 'bg-pink-500',
+      activeGradient: 'from-pink-400 to-rose-500',
+      activeShadow: 'rgba(244,114,182,0.45)',
+      inactiveColor: '#9CA3AF',
     },
     {
       path: '/notifications',
       icon: Bell,
       label: t('navAlerts'),
-      activeColor: 'text-amber-500',
-      activeBg: 'bg-amber-50',
-      dotColor: 'bg-amber-500',
+      activeGradient: 'from-amber-400 to-orange-500',
+      activeShadow: 'rgba(251,191,36,0.45)',
+      inactiveColor: '#9CA3AF',
+      badge: unreadCount && unreadCount > 0 ? unreadCount : undefined,
     },
     {
       path: '/settings',
       icon: Settings,
       label: t('navSettings'),
-      activeColor: 'text-slate-600',
-      activeBg: 'bg-slate-100',
-      dotColor: 'bg-slate-500',
+      activeGradient: 'from-slate-500 to-slate-600',
+      activeShadow: 'rgba(100,116,139,0.45)',
+      inactiveColor: '#9CA3AF',
     },
   ];
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 flex justify-around items-center h-[68px] max-w-md mx-auto"
-      style={{ boxShadow: '0 -4px 20px rgba(79,195,247,0.12)' }}
+      className="fixed bottom-0 left-0 right-0 bg-white flex justify-around items-center max-w-md mx-auto"
+      style={{
+        height: '72px',
+        borderTop: '1px solid #F1F5F9',
+        boxShadow: '0 -6px 30px rgba(79,195,247,0.10)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
     >
-      {NAV_ITEMS.map(({ path, icon: Icon, label, activeColor, activeBg, dotColor }) => {
+      {NAV_ITEMS.map(({ path, icon: Icon, label, activeGradient, activeShadow, inactiveColor, badge }) => {
         const isActive = location === path || (path !== '/' && location.startsWith(path));
         return (
           <Link
@@ -63,23 +75,29 @@ export default function BottomNavigation() {
             className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full py-1 transition-all"
             title={label}
           >
-            <div
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
-                isActive ? `${activeBg} ${activeColor}` : 'text-gray-400'
-              }`}
-            >
-              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
+            <div className="relative">
+              <div
+                className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+                  isActive
+                    ? `bg-gradient-to-br ${activeGradient} text-white`
+                    : 'text-gray-400'
+                }`}
+                style={isActive ? { boxShadow: `0 4px 14px ${activeShadow}` } : {}}
+              >
+                <Icon size={22} strokeWidth={isActive ? 2.5 : 1.8} color={isActive ? 'white' : inactiveColor} />
+              </div>
+              {badge && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 rounded-full text-[9px] text-white font-bold flex items-center justify-center px-1 shadow">
+                  {badge > 9 ? '9+' : badge}
+                </span>
+              )}
             </div>
             <span
-              className={`text-[9px] font-semibold leading-tight transition-colors ${
-                isActive ? activeColor : 'text-gray-400'
-              }`}
+              className="text-[9px] font-semibold leading-tight transition-colors"
+              style={{ color: isActive ? '#0288D1' : '#9CA3AF' }}
             >
               {label}
             </span>
-            {isActive && (
-              <span className={`w-1 h-1 rounded-full ${dotColor} mt-0.5`} />
-            )}
           </Link>
         );
       })}
