@@ -203,3 +203,15 @@
 - [x] Remplacer la mention adrénaline par "Donner uniquement le médicament prescrit par le médecin de l'enfant"
 - [x] @keyframes float + fadeInUp ajoutés dans index.css
 - [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 28 : Données dynamiques Dashboard + Timeline + Détection allergènes
+
+- [x] Procédure tRPC `dashboard.getStats` : jours sans symptôme, repas du mois, vaccins effectués, alertes non lues
+- [x] Procédure tRPC `dashboard.getRecentAllergenAlert` : dernier repas (24h) avec symptôme sévérité >= 7
+- [x] Procédure tRPC `dashboard.getRecentActivity` : 5 dernières entrées (repas + symptômes) triées par date
+- [x] Procédure tRPC `timeline.getEntries` : food_entries + symptom_entries + doctor_visits triés par date
+- [x] Procédure tRPC `timeline.deleteEntry` : suppression d'une entrée (food ou symptom ou doctor)
+- [x] Mettre à jour Dashboard.tsx pour utiliser les vraies stats (remplacer les chiffres fixes)
+- [x] Afficher la bannière d'allergène dynamique (vert si aucune alerte, rouge si alerte détectée)
+- [x] Mettre à jour Timeline.tsx : chargement réel, filtres (Tout/Repas/Symptômes/Médecin), suppression avec confirmation
+- [x] 0 erreur TypeScript · 21 tests passants

@@ -103,10 +103,27 @@ export default function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t('goodMorning') : hour < 18 ? t('goodAfternoon') : t('goodEvening');
 
+  const childId = selectedChild?.id ?? 0;
+
   const { data: unreadCount } = trpc.notifications.unreadCount.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
   });
+
+  const { data: dashStats } = trpc.dashboard.getStats.useQuery(
+    { childId },
+    { enabled: childId > 0, retry: false, refetchOnWindowFocus: false }
+  );
+
+  const { data: allergenAlert, isLoading: allergenLoading, isSuccess: allergenSuccess } = trpc.dashboard.getRecentAllergenAlert.useQuery(
+    { childId },
+    { enabled: childId > 0, retry: false, refetchOnWindowFocus: false }
+  );
+
+  const { data: recentActivity } = trpc.dashboard.getRecentActivity.useQuery(
+    { childId },
+    { enabled: childId > 0, retry: false, refetchOnWindowFocus: false }
+  );
 
   const QUICK_ACTIONS = [
     {
@@ -157,10 +174,10 @@ export default function Dashboard() {
   ];
 
   const STATS = [
-    { label: isAr ? 'وجبات هذا الشهر' : isFr ? 'Repas ce mois' : 'Meals this month', value: '24', icon: Apple, gradient: 'linear-gradient(135deg, #B3E5FC, #4FC3F7)', shadow: 'rgba(79,195,247,0.3)' },
-    { label: isAr ? 'أيام بدون أعراض' : isFr ? 'Jours sans symptôme' : 'Symptom-free days', value: '5', icon: Shield, gradient: 'linear-gradient(135deg, #C8E6C9, #43A047)', shadow: 'rgba(102,187,106,0.3)' },
-    { label: isAr ? 'تنبيهات نشطة' : isFr ? 'Alertes actives' : 'Active alerts', value: '2', icon: Bell, gradient: 'linear-gradient(135deg, #FFCDD2, #E53935)', shadow: 'rgba(239,83,80,0.3)' },
-    { label: isAr ? 'لقاحات محدثة' : isFr ? 'Vaccins à jour' : 'Vaccines up to date', value: '8', icon: Syringe, gradient: 'linear-gradient(135deg, #E1BEE7, #8E24AA)', shadow: 'rgba(171,71,188,0.3)' },
+    { label: isAr ? 'وجبات هذا الشهر' : isFr ? 'Repas ce mois' : 'Meals this month', value: dashStats ? String(dashStats.mealsThisMonth) : '—', icon: Apple, gradient: 'linear-gradient(135deg, #B3E5FC, #4FC3F7)', shadow: 'rgba(79,195,247,0.3)' },
+    { label: isAr ? 'أيام بدون أعراض' : isFr ? 'Jours sans symptôme' : 'Symptom-free days', value: dashStats ? String(dashStats.symptomFreeDays) : '—', icon: Shield, gradient: 'linear-gradient(135deg, #C8E6C9, #43A047)', shadow: 'rgba(102,187,106,0.3)' },
+    { label: isAr ? 'تنبيهات نشطة' : isFr ? 'Alertes actives' : 'Active alerts', value: dashStats ? String(dashStats.activeAlerts) : (unreadCount !== undefined ? String(unreadCount) : '—'), icon: Bell, gradient: 'linear-gradient(135deg, #FFCDD2, #E53935)', shadow: 'rgba(239,83,80,0.3)' },
+    { label: isAr ? 'لقاحات مكتملة' : isFr ? 'Vaccins effectués' : 'Vaccines done', value: dashStats ? String(dashStats.vaccinesDone) : '—', icon: Syringe, gradient: 'linear-gradient(135deg, #E1BEE7, #8E24AA)', shadow: 'rgba(171,71,188,0.3)' },
   ];
 
   return (
@@ -229,25 +246,48 @@ export default function Dashboard() {
 
       <div className="max-w-md mx-auto px-4 mt-4 space-y-5">
 
-        {/* ── Alert Banner ── */}
-        <div
-          className="flex items-start gap-3 p-4 rounded-3xl cursor-pointer"
-          style={{ background: 'linear-gradient(135deg, #FFEBEE, #FFCDD2)', border: '1.5px solid #FFCDD2', boxShadow: '0 4px 16px rgba(239,83,80,0.12)' }}
-          onClick={() => setLocation('/symptoms')}
-        >
-          <div className="w-10 h-10 rounded-2xl bg-red-500 flex items-center justify-center flex-shrink-0 shadow-sm" style={{ boxShadow: '0 4px 12px rgba(239,83,80,0.4)' }}>
-            <AlertCircle className="w-5 h-5 text-white" />
+        {/* ── Alert Banner (dynamique) ── */}
+        {allergenAlert ? (
+          <div
+            className="flex items-start gap-3 p-4 rounded-3xl cursor-pointer"
+            style={{ background: 'linear-gradient(135deg, #FFEBEE, #FFCDD2)', border: '1.5px solid #FFCDD2', boxShadow: '0 4px 16px rgba(239,83,80,0.12)' }}
+            onClick={() => setLocation('/symptoms')}
+          >
+            <div className="w-10 h-10 rounded-2xl bg-red-500 flex items-center justify-center flex-shrink-0 shadow-sm" style={{ boxShadow: '0 4px 12px rgba(239,83,80,0.4)' }}>
+              <AlertCircle className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-red-700">
+                {isAr ? 'تم اكتشاف مسبب حساسية' : isFr ? 'Allergène détecté' : 'Allergen Detected'}
+              </p>
+              <p className="text-xs text-red-500 mt-0.5">
+                {isAr
+                  ? `تم اكتشاف ${allergenAlert.foodName} في آخر وجبة مسجلة`
+                  : isFr
+                  ? `${allergenAlert.foodName} détecté dans le dernier repas enregistré`
+                  : `${allergenAlert.foodName} detected in last logged meal`}
+              </p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-red-400 flex-shrink-0 mt-1" />
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold text-red-700">
-              {isAr ? 'تم اكتشاف مسبب حساسية' : isFr ? 'Allergène détecté' : 'Allergen Detected'}
-            </p>
-            <p className="text-xs text-red-500 mt-0.5">
-              {isAr ? 'تم اكتشاف الحليب في آخر وجبة مسجلة' : isFr ? 'Lait détecté dans le dernier repas enregistré' : 'Milk detected in last logged meal'}
-            </p>
+        ) : childId > 0 && allergenSuccess && !allergenLoading ? (
+          <div
+            className="flex items-start gap-3 p-4 rounded-3xl"
+            style={{ background: 'linear-gradient(135deg, #E8F5E9, #C8E6C9)', border: '1.5px solid #C8E6C9', boxShadow: '0 4px 16px rgba(102,187,106,0.12)' }}
+          >
+            <div className="w-10 h-10 rounded-2xl bg-green-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Shield className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-green-700">
+                {isAr ? 'لا توجد حساسية مسجلة مؤخراً' : isFr ? 'Aucune allergie détectée récemment' : 'No allergen detected recently'}
+              </p>
+              <p className="text-xs text-green-600 mt-0.5">
+                {isAr ? 'كل شيء على ما يرام ❤️' : isFr ? 'Tout va bien ❤️' : 'Everything looks good ❤️'}
+              </p>
+            </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-red-400 flex-shrink-0 mt-1" />
-        </div>
+        ) : null}
 
         {/* ── Stats Row ── */}
         <div className="grid grid-cols-2 gap-3">
@@ -324,7 +364,7 @@ export default function Dashboard() {
           <ChevronRight className="w-5 h-5 text-white/80 flex-shrink-0" />
         </button>
 
-        {/* ── Recent Activity ── */}
+        {/* ── Recent Activity (données réelles) ── */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-base font-extrabold text-gray-800">
@@ -335,47 +375,50 @@ export default function Dashboard() {
             </button>
           </div>
           <div className="space-y-2.5">
-            {[
-              {
-                icon: Apple,
-                gradient: 'linear-gradient(135deg, #B3E5FC, #4FC3F7)',
-                title: isAr ? 'وجبة مسجلة' : isFr ? 'Repas enregistré' : 'Meal logged',
-                sub: isAr ? 'حليب، قمح، بيض' : isFr ? 'Lait, Blé, Œufs' : 'Milk, Wheat, Eggs',
-                time: '10:30',
-              },
-              {
-                icon: Activity,
-                gradient: 'linear-gradient(135deg, #F8BBD0, #F48FB1)',
-                title: isAr ? 'عرض مُبلَّغ عنه' : isFr ? 'Symptôme signalé' : 'Symptom reported',
-                sub: isAr ? 'طفح جلدي – متوسط' : isFr ? 'Éruption cutanée – Modéré' : 'Skin rash – Moderate',
-                time: '08:15',
-              },
-              {
-                icon: Shield,
-                gradient: 'linear-gradient(135deg, #C8E6C9, #66BB6A)',
-                title: isAr ? 'لا أعراض' : isFr ? 'Aucun symptôme' : 'No symptoms',
-                sub: isAr ? 'يوم هادئ 🎉' : isFr ? 'Journée calme 🎉' : 'Calm day 🎉',
-                time: isAr ? 'أمس' : isFr ? 'Hier' : 'Yesterday',
-              },
-            ].map((item, i) => (
+            {recentActivity && recentActivity.length > 0 ? (
+              recentActivity.map((item) => {
+                const isMeal = item.type === 'meal';
+                const isSymptom = item.type === 'symptom';
+                const gradient = isMeal
+                  ? 'linear-gradient(135deg, #B3E5FC, #4FC3F7)'
+                  : isSymptom
+                  ? 'linear-gradient(135deg, #F8BBD0, #F48FB1)'
+                  : 'linear-gradient(135deg, #C8E6C9, #66BB6A)';
+                const IconComp = isMeal ? Apple : isSymptom ? Activity : Stethoscope;
+                const timeStr = new Date(item.date).toLocaleTimeString(
+                  language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US',
+                  { hour: '2-digit', minute: '2-digit' }
+                );
+                return (
+                  <div
+                    key={`${item.type}-${item.id}`}
+                    className="flex items-center gap-3 p-3.5 rounded-3xl bg-white"
+                    style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)', border: '1px solid #F1F5F9' }}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
+                      style={{ background: gradient }}
+                    >
+                      <IconComp className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-800 truncate">{item.title}</p>
+                      <p className="text-xs text-gray-500 truncate">{item.detail}</p>
+                    </div>
+                    <span className="text-[10px] text-gray-400 flex-shrink-0">{timeStr}</span>
+                  </div>
+                );
+              })
+            ) : (
               <div
-                key={i}
                 className="flex items-center gap-3 p-3.5 rounded-3xl bg-white"
                 style={{ boxShadow: '0 4px 16px rgba(0,0,0,0.05)', border: '1px solid #F1F5F9' }}
               >
-                <div
-                  className="w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: item.gradient }}
-                >
-                  <item.icon className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-800 truncate">{item.title}</p>
-                  <p className="text-xs text-gray-500 truncate">{item.sub}</p>
-                </div>
-                <span className="text-[10px] text-gray-400 flex-shrink-0">{item.time}</span>
+                <p className="text-sm text-gray-400 text-center w-full">
+                  {isAr ? 'لا توجد سجلات حديثة' : isFr ? 'Aucune activité récente' : 'No recent activity'}
+                </p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
