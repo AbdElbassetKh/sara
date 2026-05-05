@@ -256,3 +256,14 @@
 - [x] Options de partage : téléchargement, email (mailto:), WhatsApp, Web Share API
 - [x] Intégré dans ExportReport.tsx (section "Générer PDF directement")
 - [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 33 : Envoi email côté serveur avec rapport PDF
+
+- [x] Installer Resend SDK + PDFKit (npm) pour envoi email côté serveur
+- [x] Configurer le secret RESEND_API_KEY via webdev_request_secrets
+- [x] Helper `server/_core/email.ts` : envoi via Resend avec PDF en pièce jointe (HTML trilingue FR/EN/AR)
+- [x] Helper `server/_core/pdfReport.ts` : génération PDF professionnel avec PDFKit (tableaux, sections, footer)
+- [x] Procédure tRPC `report.sendByEmail` : fetch child + symptoms + meals + doctors → PDF → Resend
+- [x] Mettre à jour ReportGenerator.tsx : section email bleue, champ email, bouton "Envoyer par email", état loading/succès
+- [x] Test Vitest `report.test.ts` : validation RESEND_API_KEY + génération PDF buffer (%PDF header)
+- [x] 0 erreur TypeScript · 24 tests passants (7 fichiers)

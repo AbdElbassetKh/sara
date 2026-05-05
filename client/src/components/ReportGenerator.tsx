@@ -1,19 +1,20 @@
 /**
  * ReportGenerator – generates a PDF summary report for the selected child
- * and offers sharing options (download, email, WhatsApp, Web Share API).
+ * and offers sharing options (download, email via server, WhatsApp, Web Share API).
  */
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAppContext } from "@/contexts/AppContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { FileText, Download, Mail, Share2, Loader2 } from "lucide-react";
+import { FileText, Download, Mail, Share2, Loader2, Send, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 
@@ -36,6 +37,8 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
   const [generating, setGenerating] = useState(false);
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [pdfName, setPdfName] = useState("allenest-report.pdf");
+  const [emailInput, setEmailInput] = useState("");
+  const [emailSent, setEmailSent] = useState(false);
 
   const isRTL = language === "ar";
 
@@ -53,21 +56,54 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
     { enabled: !!selectedChild }
   );
 
+  // Server-side email mutation
+  const sendEmailMutation = trpc.report.sendByEmail.useMutation({
+    onSuccess: () => {
+      setEmailSent(true);
+      toast.success(
+        language === "ar"
+          ? `تم إرسال التقرير إلى ${emailInput} ✉️`
+          : language === "fr"
+          ? `Rapport envoyé à ${emailInput} ✉️`
+          : `Report sent to ${emailInput} ✉️`
+      );
+    },
+    onError: (err) => {
+      toast.error(
+        language === "ar"
+          ? `فشل الإرسال: ${err.message}`
+          : language === "fr"
+          ? `Échec de l'envoi : ${err.message}`
+          : `Send failed: ${err.message}`
+      );
+    },
+  });
+
   const labels = {
     btn: language === "ar" ? "تصدير تقرير PDF" : language === "fr" ? "Générer rapport PDF" : "Generate PDF Report",
     title: language === "ar" ? "تقرير صحة الطفل" : language === "fr" ? "Rapport de santé" : "Health Report",
     generating: language === "ar" ? "جاري إنشاء التقرير..." : language === "fr" ? "Génération en cours..." : "Generating report...",
     download: language === "ar" ? "تحميل" : language === "fr" ? "Télécharger" : "Download",
-    email: "Email",
+    emailPlaceholder: language === "ar" ? "أدخل البريد الإلكتروني" : language === "fr" ? "Entrez l'adresse email" : "Enter email address",
+    sendEmail: language === "ar" ? "إرسال بالبريد" : language === "fr" ? "Envoyer par email" : "Send by email",
+    sending: language === "ar" ? "جاري الإرسال..." : language === "fr" ? "Envoi en cours..." : "Sending...",
+    emailSent: language === "ar" ? "تم الإرسال ✓" : language === "fr" ? "Envoyé ✓" : "Sent ✓",
     whatsapp: "WhatsApp",
     share: language === "ar" ? "مشاركة" : language === "fr" ? "Partager" : "Share",
     ready: language === "ar" ? "التقرير جاهز!" : language === "fr" ? "Rapport prêt !" : "Report ready!",
     close: language === "ar" ? "إغلاق" : language === "fr" ? "Fermer" : "Close",
+    emailSection: language === "ar" ? "إرسال مباشر بالبريد الإلكتروني" : language === "fr" ? "Envoi direct par email" : "Direct email delivery",
+    emailNote: language === "ar"
+      ? "سيتم إرسال التقرير كملف PDF مرفق مباشرةً إلى البريد المحدد."
+      : language === "fr"
+      ? "Le rapport PDF sera envoyé directement en pièce jointe à l'adresse indiquée."
+      : "The PDF report will be sent directly as an attachment to the specified address.",
   };
 
   const generatePDF = async () => {
     if (!selectedChild) return;
     setGenerating(true);
+    setEmailSent(false);
     try {
       const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
       const pageW = doc.internal.pageSize.getWidth();
@@ -151,7 +187,7 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
         recentMeals.slice(0, 20).forEach((m: any) => {
           if (y > 270) { doc.addPage(); y = 20; }
           const date = new Date(m.createdAt).toLocaleDateString();
-          const foods = Array.isArray(m.foods) ? m.foods.join(", ") : m.foods ?? "";
+          const foods = Array.isArray(m.foods) ? m.foods.join(", ") : m.foodName ?? "";
           doc.text(`• ${date}  |  ${foods}`, margin, y);
           y += 5.5;
         });
@@ -162,7 +198,6 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
       if (y > 240) { doc.addPage(); y = 20; }
       doc.setFontSize(13);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(248, 187, 208); // #F8BBD0 – too light, use darker pink
       doc.setTextColor(219, 112, 147);
       doc.text(`Doctors – ${doctorsList.length} contacts`, margin, y);
       y += 7;
@@ -220,12 +255,20 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
     URL.revokeObjectURL(url);
   };
 
-  const handleEmail = () => {
-    const subject = encodeURIComponent(`AlleNest Health Report – ${selectedChild?.name ?? ""}`);
-    const body = encodeURIComponent("Please find the attached health report generated by AlleNest.");
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
-    // Note: mailto: cannot attach files; user must download first then attach manually
-    toast(language === "ar" ? "قم بتحميل الملف ثم أرفقه بالبريد الإلكتروني" : language === "fr" ? "Téléchargez le fichier puis joignez-le à l'email" : "Download the file then attach it to the email");
+  const handleSendEmail = () => {
+    if (!selectedChild || !emailInput.trim()) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailInput.trim())) {
+      toast.error(
+        language === "ar" ? "البريد الإلكتروني غير صالح" : language === "fr" ? "Adresse email invalide" : "Invalid email address"
+      );
+      return;
+    }
+    sendEmailMutation.mutate({
+      childId: selectedChild.id,
+      recipientEmail: emailInput.trim(),
+      language: language as "fr" | "en" | "ar",
+    });
   };
 
   const handleWhatsApp = () => {
@@ -279,7 +322,7 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
       )}
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-xs mx-auto rounded-2xl" dir={isRTL ? "rtl" : "ltr"}>
+        <DialogContent className="max-w-sm mx-auto rounded-2xl" dir={isRTL ? "rtl" : "ltr"}>
           <DialogHeader>
             <DialogTitle className="text-[#4FC3F7] flex items-center gap-2">
               <FileText size={20} />
@@ -287,31 +330,60 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
             </DialogTitle>
           </DialogHeader>
 
-          <p className="text-sm text-gray-500 text-center py-2">
+          <p className="text-sm text-gray-500 text-center py-1">
             {pdfName}
           </p>
 
-          <div className="grid grid-cols-2 gap-3 py-2">
+          {/* ── Direct email section ───────────────────────────────────── */}
+          <div className="bg-blue-50 rounded-xl p-3 space-y-2">
+            <p className="text-xs font-semibold text-[#0288D1] flex items-center gap-1">
+              <Mail size={13} />
+              {labels.emailSection}
+            </p>
+            <p className="text-xs text-gray-500">{labels.emailNote}</p>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder={labels.emailPlaceholder}
+                value={emailInput}
+                onChange={(e) => { setEmailInput(e.target.value); setEmailSent(false); }}
+                className="flex-1 h-9 text-sm rounded-xl border-blue-200 focus:border-[#4FC3F7]"
+                disabled={sendEmailMutation.isPending}
+                onKeyDown={(e) => e.key === "Enter" && handleSendEmail()}
+              />
+              <Button
+                onClick={handleSendEmail}
+                disabled={sendEmailMutation.isPending || !emailInput.trim() || emailSent}
+                className={`h-9 px-3 rounded-xl text-white flex items-center gap-1 text-xs ${
+                  emailSent
+                    ? "bg-green-500 hover:bg-green-500"
+                    : "bg-[#0288D1] hover:bg-[#0277BD]"
+                }`}
+              >
+                {sendEmailMutation.isPending ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : emailSent ? (
+                  <><CheckCircle2 size={14} />{labels.emailSent}</>
+                ) : (
+                  <><Send size={14} />{labels.sendEmail}</>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          {/* ── Other sharing options ──────────────────────────────────── */}
+          <div className="grid grid-cols-3 gap-2 pt-1">
             <Button
               onClick={handleDownload}
-              className="rounded-xl bg-gradient-to-r from-[#4FC3F7] to-[#29B6F6] text-white flex items-center gap-2"
+              className="rounded-xl bg-gradient-to-r from-[#4FC3F7] to-[#29B6F6] text-white flex items-center gap-1 text-xs px-2"
             >
-              <Download size={16} />
+              <Download size={14} />
               {labels.download}
             </Button>
 
             <Button
-              onClick={handleEmail}
-              variant="outline"
-              className="rounded-xl flex items-center gap-2"
-            >
-              <Mail size={16} />
-              {labels.email}
-            </Button>
-
-            <Button
               onClick={handleWhatsApp}
-              className="rounded-xl bg-[#25D366] text-white flex items-center gap-2 hover:bg-[#1ebe57]"
+              className="rounded-xl bg-[#25D366] text-white flex items-center gap-1 hover:bg-[#1ebe57] text-xs px-2"
             >
               <WhatsAppIcon />
               WhatsApp
@@ -320,9 +392,9 @@ export default function ReportGenerator({ variant = "full" }: ReportGeneratorPro
             <Button
               onClick={handleWebShare}
               variant="outline"
-              className="rounded-xl flex items-center gap-2"
+              className="rounded-xl flex items-center gap-1 text-xs px-2"
             >
-              <Share2 size={16} />
+              <Share2 size={14} />
               {labels.share}
             </Button>
           </div>
