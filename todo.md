@@ -144,11 +144,11 @@
 - [x] 0 erreur TypeScript · 15 tests passants
 
 ## Phase 22 : Correction complète du système de langue
-- [ ] Auditer LanguageContext et translations.ts
-- [ ] Corriger les textes hardcodés dans toutes les pages
-- [ ] S'assurer que le changement de langue est réactif partout
-- [ ] Vérifier la direction RTL pour l'arabe dans toutes les pages
-- [ ] 0 erreur TypeScript
+- [x] Auditer LanguageContext et translations.ts
+- [x] Corriger les textes hardcodés dans toutes les pages
+- [x] S'assurer que le changement de langue est réactif partout
+- [x] Vérifier la direction RTL pour l'arabe dans toutes les pages
+- [x] 0 erreur TypeScript
 
 ## Phase 23 : Rendez-vous médicaux avec rappels
 - [x] Ajouter table `appointments` dans drizzle/schema.ts
@@ -178,17 +178,17 @@
 - [x] 0 erreur TypeScript · 21 tests passants
 
 ## Phase 26 : Professionnalisation automatique
-- [ ] Composant PageHeader réutilisable (gradient + titre + back button)
-- [ ] Refonte Onboarding : illustration, sélecteur langue visuel, bouton CTA
-- [ ] Refonte Settings : sections avec icônes colorées, toggles stylisés
-- [ ] Refonte ChildProfileSetup : formulaire avec champs stylisés
-- [ ] Refonte Symptoms : header rose, sévérité slider coloré
-- [ ] Refonte Meals : header bleu, liste ingrédients avec badges
-- [ ] Refonte Insights : header violet, graphiques, recommandations IA
-- [ ] Refonte Appointments : header cyan, liste RDV avec statuts
-- [ ] Refonte EmergencyPage : header rouge vif, boutons d'urgence
-- [ ] Refonte Advice : header vert, articles avec images
-- [ ] 0 erreur TypeScript · tests passants
+- [x] Composant PageHeader réutilisable (gradient + titre + back button)
+- [x] Refonte Onboarding : illustration, sélecteur langue visuel, bouton CTA
+- [x] Refonte Settings : sections avec icônes colorées, toggles stylisés
+- [x] Refonte ChildProfileSetup : formulaire avec champs stylisés
+- [x] Refonte Symptoms : header rose, sévérité slider coloré
+- [x] Refonte Meals : header bleu, liste ingrédients avec badges
+- [x] Refonte Insights : header violet, graphiques, recommandations IA
+- [x] Refonte Appointments : header cyan, liste RDV avec statuts
+- [x] Refonte EmergencyPage : header rouge vif, boutons d'urgence
+- [x] Refonte Advice : header vert, articles avec images
+- [x] 0 erreur TypeScript · tests passants
 
 ## Phase 27 : Améliorations UI/UX ciblées
 
@@ -244,4 +244,15 @@
 - [x] Formulaire Symptômes : grille icônes depuis DB, filtre par catégorie, multi-sélection, heure d'apparition, upload photo
 - [x] `symptoms.create` : ajout du champ `occurredAt` optionnel
 - [x] Chat IA dans Insights : procédure `insights.chat`, 3 questions suggérées, bulles de chat, réponse en AR/FR/EN, animation typing
+- [x] 0 erreur TypeScript · 21 tests passants
+
+## Phase 32 : Médecins + Rapport PDF + Photo symptômes
+
+- [x] Migration DB : table `doctors` (name, specialty, phone, email, address, notes, userId, childId)
+- [x] Routeur tRPC `doctors` : create, list, update, delete
+- [x] Page Doctors.tsx : formulaire + liste + CRUD avec spécialités (pédiatre, allergologue, généraliste)
+- [x] Route `/doctors` dans App.tsx + lien depuis Settings (menu card)
+- [x] Composant ReportGenerator : génération PDF (jsPDF) avec infos enfant + symptômes + repas + médecins
+- [x] Options de partage : téléchargement, email (mailto:), WhatsApp, Web Share API
+- [x] Intégré dans ExportReport.tsx (section "Générer PDF directement")
 - [x] 0 erreur TypeScript · 21 tests passants

@@ -304,3 +304,21 @@ export const symptomTypes = mysqlTable("symptom_types", {
 
 export type SymptomType = typeof symptomTypes.$inferSelect;
 export type InsertSymptomType = typeof symptomTypes.$inferInsert;
+
+// Doctors (carnet de médecins de l'enfant)
+export const doctors = mysqlTable("doctors", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  childId: int("childId"),
+  name: varchar("name", { length: 255 }).notNull(),
+  specialty: varchar("specialty", { length: 100 }),
+  phone: varchar("phone", { length: 50 }),
+  email: varchar("email", { length: 320 }),
+  address: text("address"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Doctor = typeof doctors.$inferSelect;
+export type InsertDoctor = typeof doctors.$inferInsert;

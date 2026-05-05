@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES } from '@/const';
-import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, ChevronRight, Baby, Settings as SettingsIcon } from 'lucide-react';
+import { LogOut, Bell, Globe, Lock, Info, Crown, Sun, FileText, Star, ChevronRight, Baby, Settings as SettingsIcon, Stethoscope } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { useLocation } from 'wouter';
 import { ChildPhotoEditor } from '@/components/ChildPhotoEditor';
@@ -44,6 +44,14 @@ export default function Settings() {
       gradient: 'linear-gradient(135deg, #A5D6A7, #388E3C)',
       shadow: 'rgba(165,214,167,0.4)',
       path: '/daily-checkin',
+    },
+    {
+      icon: Stethoscope,
+      label: isAr ? 'قائمة الأطباء' : isFr ? 'Mes Médecins' : 'My Doctors',
+      sub: isAr ? 'إدارة جهات الاتصال الطبية' : isFr ? 'Gérer vos contacts médicaux' : 'Manage your medical contacts',
+      gradient: 'linear-gradient(135deg, #4FC3F7, #0288D1)',
+      shadow: 'rgba(79,195,247,0.4)',
+      path: '/doctors',
     },
     {
       icon: FileText,

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useState } from 'react';
+import ReportGenerator from '@/components/ReportGenerator';
 
 const LOGO_URL = '/manus-storage/allenest-logo-v2_33417a5b.jpg';
 
@@ -312,6 +313,14 @@ ${selectedSections.map(s => {
             ? 'سيتم تنزيل التقرير بتنسيق HTML (قابل للطباعة كـ PDF من متصفحك).'
             : 'Report will be downloaded as HTML (printable as PDF from your browser).'}
         </p>
+
+        {/* Quick PDF export with jsPDF */}
+        <div className="pt-2">
+          <p className="text-xs font-semibold text-muted-foreground mb-2 text-center">
+            {language === 'fr' ? 'Ou générez un PDF directement :' : language === 'ar' ? 'أو أنشئ PDF مباشرةً:' : 'Or generate a PDF directly:'}
+          </p>
+          <ReportGenerator variant="full" />
+        </div>
       </div>
     </div>
   );
