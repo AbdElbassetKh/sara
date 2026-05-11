@@ -5,38 +5,16 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Stethoscope, Plus, FileText, Phone } from 'lucide-react';
+import { Stethoscope, Plus, FileText, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAppContext } from '@/contexts/AppContext';
+import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
 
 export default function Doctor() {
   const { t, language } = useLanguage();
-
-  const DOCTOR_VISITS = [
-    {
-      id: 1,
-      doctorName: 'Dr. Sarah Smith',
-      specialty: language === 'fr' ? 'Pédiatrie' : language === 'ar' ? 'طب الأطفال' : 'Pediatrics',
-      date: '2024-05-01',
-      notes: language === 'fr' ? 'Bilan général. Tous les signes vitaux normaux. Croissance dans les normes.' : language === 'ar' ? 'فحص عام. جميع العلامات الحيوية طبيعية. النمو ضمن المعدل.' : 'General checkup. All vital signs normal. Growth on track.',
-      documents: 2,
-    },
-    {
-      id: 2,
-      doctorName: 'Dr. John Doe',
-      specialty: language === 'fr' ? 'Allergologue' : language === 'ar' ? 'طبيب الحساسية' : 'Allergist',
-      date: '2024-04-15',
-      notes: language === 'fr' ? 'Tests d\'allergie effectués. Allergie au lait confirmée.' : language === 'ar' ? 'تم إجراء اختبارات الحساسية. تأكدت حساسية الحليب.' : 'Allergy testing completed. Milk allergy confirmed.',
-      documents: 1,
-    },
-    {
-      id: 3,
-      doctorName: 'Dr. Emily Brown',
-      specialty: language === 'fr' ? 'Pédiatrie' : language === 'ar' ? 'طب الأطفال' : 'Pediatrics',
-      date: '2024-03-20',
-      notes: language === 'fr' ? 'Rendez-vous vaccination. Polio 2 administré.' : language === 'ar' ? 'موعد التطعيم. تم إعطاء شلل الأطفال 2.' : 'Vaccination appointment. Polio 2 administered.',
-      documents: 0,
-    },
-  ];
+  const { selectedChild } = useAppContext();
+  const childId = selectedChild?.id ?? 0;
 
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,14 +24,46 @@ export default function Doctor() {
     notes: '',
   });
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
+  const { data: visits = [], isLoading, refetch } = trpc.doctorVisits.list.useQuery(
+    { childId },
+    { enabled: childId > 0 }
+  );
+
+  const createMutation = trpc.doctorVisits.create.useMutation({
+    onSuccess: () => {
+      refetch();
+      setFormData({ doctorName: '', specialty: '', date: new Date().toISOString().split('T')[0], notes: '' });
+      setShowForm(false);
+      toast.success(language === 'ar' ? 'تم حفظ الزيارة' : language === 'fr' ? 'Visite enregistrée' : 'Visit saved');
+    },
+    onError: () => {
+      toast.error(language === 'ar' ? 'حدث خطأ' : language === 'fr' ? "Erreur lors de l'enregistrement" : 'Error saving visit');
+    },
+  });
+
+  const deleteMutation = trpc.doctorVisits.delete.useMutation({
+    onSuccess: () => {
+      refetch();
+      toast.success(language === 'ar' ? 'تم الحذف' : language === 'fr' ? 'Supprimé' : 'Deleted');
+    },
+  });
 
   const handleSubmit = () => {
-    console.log(formData);
-    setFormData({ doctorName: '', specialty: '', date: new Date().toISOString().split('T')[0], notes: '' });
-    setShowForm(false);
+    if (!childId) {
+      toast.error(language === 'ar' ? 'اختر طفلاً أولاً' : language === 'fr' ? 'Sélectionnez un enfant' : 'Select a child first');
+      return;
+    }
+    if (!formData.doctorName.trim()) {
+      toast.error(language === 'ar' ? 'اسم الطبيب مطلوب' : language === 'fr' ? 'Le nom du médecin est requis' : 'Doctor name is required');
+      return;
+    }
+    createMutation.mutate({
+      childId,
+      doctorName: formData.doctorName.trim(),
+      specialty: formData.specialty.trim() || undefined,
+      visitDate: formData.date,
+      notes: formData.notes.trim() || undefined,
+    });
   };
 
   return (
@@ -64,7 +74,11 @@ export default function Doctor() {
           <div className="max-w-md mx-auto">
             <h1 className="text-2xl font-extrabold text-white">{t('doctorVisits')}</h1>
             <p className="text-sm text-white/80 mt-1">
-              {language === 'fr' ? "Suivez les rendez-vous médicaux et les dossiers" : language === 'ar' ? 'تتبع المواعيد الطبية والسجلات' : "Track medical appointments and records"}
+              {language === 'fr'
+                ? 'Suivez les rendez-vous médicaux et les dossiers'
+                : language === 'ar'
+                ? 'تتبع المواعيد الطبية والسجلات'
+                : 'Track medical appointments and records'}
             </p>
           </div>
         </div>
@@ -73,70 +87,83 @@ export default function Doctor() {
         <div className="grid grid-cols-2 gap-3">
           <Card className="p-4 text-center space-y-1 shadow-sm">
             <Stethoscope size={22} className="mx-auto text-primary" />
-            <p className="text-xl font-bold text-foreground">{DOCTOR_VISITS.length}</p>
+            <p className="text-xl font-bold text-foreground">
+              {isLoading ? '—' : visits.length}
+            </p>
             <p className="text-xs text-muted-foreground">
               {language === 'fr' ? 'Visites totales' : language === 'ar' ? 'إجمالي الزيارات' : 'Total Visits'}
             </p>
           </Card>
           <Card className="p-4 text-center space-y-1 shadow-sm">
             <FileText size={22} className="mx-auto text-secondary" />
-            <p className="text-xl font-bold text-foreground">3</p>
+            <p className="text-xl font-bold text-foreground">
+              {isLoading ? '—' : visits.filter(v => v.notes && v.notes.length > 0).length}
+            </p>
             <p className="text-xs text-muted-foreground">
-              {language === 'fr' ? 'Documents' : language === 'ar' ? 'الوثائق' : 'Documents'}
+              {language === 'fr' ? 'Avec notes' : language === 'ar' ? 'مع ملاحظات' : 'With notes'}
             </p>
           </Card>
         </div>
 
-        {/* Doctor Contacts */}
-        <Card className="p-5 space-y-3 shadow-sm">
-          <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
-            <Phone size={18} />
-            {language === 'fr' ? 'Contacts médicaux' : language === 'ar' ? 'جهات الاتصال الطبية' : 'Medical Contacts'}
-          </h2>
-          <div className="space-y-2">
-            <div className="p-3 bg-muted/10 rounded-lg">
-              <p className="text-sm font-semibold text-foreground">
-                {language === 'fr' ? 'Pédiatre principal' : language === 'ar' ? 'طبيب الأطفال الرئيسي' : 'Primary Pediatrician'}
-              </p>
-              <p className="text-sm text-muted-foreground">Dr. Sarah Smith</p>
-              <p className="text-xs text-primary font-medium mt-0.5">+1 (555) 123-4567</p>
-            </div>
-            <div className="p-3 bg-muted/10 rounded-lg">
-              <p className="text-sm font-semibold text-foreground">
-                {language === 'fr' ? 'Allergologue' : language === 'ar' ? 'طبيب الحساسية' : 'Allergist'}
-              </p>
-              <p className="text-sm text-muted-foreground">Dr. John Doe</p>
-              <p className="text-xs text-primary font-medium mt-0.5">+1 (555) 234-5678</p>
-            </div>
+        {/* Loading */}
+        {isLoading && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="animate-spin text-primary" size={28} />
           </div>
-        </Card>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && visits.length === 0 && (
+          <Card className="p-6 text-center border-0 shadow-sm">
+            <Stethoscope className="mx-auto mb-2 text-primary/40" size={32} />
+            <p className="text-sm text-muted-foreground">
+              {language === 'fr' ? 'Aucune visite enregistrée' : language === 'ar' ? 'لا توجد زيارات مسجلة' : 'No visits recorded yet'}
+            </p>
+          </Card>
+        )}
 
         {/* Visit History */}
-        <div className="space-y-3">
-          <h2 className="text-base font-semibold text-foreground">
-            {language === 'fr' ? 'Visites récentes' : language === 'ar' ? 'الزيارات الأخيرة' : 'Recent Visits'}
-          </h2>
+        {!isLoading && visits.length > 0 && (
           <div className="space-y-3">
-            {DOCTOR_VISITS.map((visit) => (
-              <Card key={visit.id} className="p-4 space-y-2 shadow-sm">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-semibold text-foreground text-sm">{visit.doctorName}</h3>
-                    <p className="text-xs text-muted-foreground">{visit.specialty}</p>
+            <h2 className="text-base font-semibold text-foreground">
+              {language === 'fr' ? 'Visites récentes' : language === 'ar' ? 'الزيارات الأخيرة' : 'Recent Visits'}
+            </h2>
+            <div className="space-y-3">
+              {visits.map((visit) => (
+                <Card key={visit.id} className="p-4 space-y-2 shadow-sm">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground text-sm truncate">{visit.doctorName}</h3>
+                      {visit.specialty && (
+                        <p className="text-xs text-muted-foreground">{visit.specialty}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 ml-2">
+                      <span className="text-xs font-semibold text-primary whitespace-nowrap">
+                        {new Date(visit.visitDate).toLocaleDateString(
+                          language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US',
+                          { year: 'numeric', month: 'short', day: 'numeric' }
+                        )}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive/80 h-7 w-7"
+                        onClick={() => deleteMutation.mutate({ id: visit.id })}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
                   </div>
-                  <span className="text-xs font-semibold text-primary">{visit.date}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">{visit.notes}</p>
-                {visit.documents > 0 && (
-                  <div className="flex items-center gap-1.5 text-xs text-secondary font-medium">
-                    <FileText size={12} />
-                    {visit.documents} {language === 'fr' ? 'document(s)' : language === 'ar' ? 'وثيقة' : `document${visit.documents > 1 ? 's' : ''}`}
-                  </div>
-                )}
-              </Card>
-            ))}
+                  {visit.notes && (
+                    <p className="text-xs text-muted-foreground line-clamp-2">{visit.notes}</p>
+                  )}
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Add Visit Form */}
         {showForm && (
@@ -149,7 +176,7 @@ export default function Doctor() {
                   id="doctorName"
                   placeholder={language === 'fr' ? 'ex. Dr. Sarah Smith' : language === 'ar' ? 'مثال: د. أحمد علي' : 'e.g., Dr. Sarah Smith'}
                   value={formData.doctorName}
-                  onChange={(e) => handleInputChange('doctorName', e.target.value)}
+                  onChange={(e) => setFormData(p => ({ ...p, doctorName: e.target.value }))}
                 />
               </div>
               <div className="space-y-1.5">
@@ -160,13 +187,13 @@ export default function Doctor() {
                   id="specialty"
                   placeholder={language === 'fr' ? 'ex. Pédiatrie' : language === 'ar' ? 'مثال: طب الأطفال' : 'e.g., Pediatrics'}
                   value={formData.specialty}
-                  onChange={(e) => handleInputChange('specialty', e.target.value)}
+                  onChange={(e) => setFormData(p => ({ ...p, specialty: e.target.value }))}
                 />
               </div>
               <DatePicker
                 label={t('visitDate')}
                 value={formData.date}
-                onChange={(v) => handleInputChange('date', v)}
+                onChange={(v) => setFormData(p => ({ ...p, date: v }))}
                 maxYear={new Date().getFullYear() + 1}
               />
               <div className="space-y-1.5">
@@ -175,13 +202,25 @@ export default function Doctor() {
                   id="notes"
                   placeholder={language === 'fr' ? 'Notes de la visite...' : language === 'ar' ? 'ملاحظات الزيارة...' : 'Visit notes...'}
                   value={formData.notes}
-                  onChange={(e) => handleInputChange('notes', e.target.value)}
+                  onChange={(e) => setFormData(p => ({ ...p, notes: e.target.value }))}
                   className="w-full p-3 border border-border rounded-lg text-sm resize-none h-24 bg-background text-foreground"
                 />
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleSubmit} className="flex-1 rounded-xl">{t('save')}</Button>
-                <Button onClick={() => setShowForm(false)} variant="outline" className="flex-1 rounded-xl">{t('cancel')}</Button>
+                <Button
+                  onClick={handleSubmit}
+                  className="flex-1 rounded-xl"
+                  disabled={createMutation.isPending}
+                >
+                  {createMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : t('save')}
+                </Button>
+                <Button
+                  onClick={() => setShowForm(false)}
+                  variant="outline"
+                  className="flex-1 rounded-xl"
+                >
+                  {t('cancel')}
+                </Button>
               </div>
             </div>
           </Card>
@@ -189,7 +228,10 @@ export default function Doctor() {
 
         {/* Add Button */}
         {!showForm && (
-          <Button onClick={() => setShowForm(true)} className="w-full h-12 text-base font-semibold gap-2 rounded-xl">
+          <Button
+            onClick={() => setShowForm(true)}
+            className="w-full h-12 text-base font-semibold gap-2 rounded-xl"
+          >
             <Plus size={18} />
             {t('addVisit')}
           </Button>

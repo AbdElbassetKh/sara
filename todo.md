@@ -279,3 +279,16 @@
 - [x] Route `/subscription` dans App.tsx + lien depuis Settings (sous-titre avec tarifs)
 - [x] Restriction Analyse IA + Chat IA aux abonnés Premium (toast + icône Crown)
 - [x] 0 erreur TypeScript · 24 tests passants
+
+## Phase 35 : Audit technique complet — Corrections pré-production
+
+- [x] Routeur tRPC `growth` : create, list, delete (données réelles depuis growth_records + ownership check)
+- [x] Routeur tRPC `doctorVisits` : create, list, delete (données réelles depuis doctor_visits + ownership check)
+- [x] Growth.tsx : connecté à la DB (remplace GROWTH_DATA hardcodée, graphique Recharts LineChart, états loading/empty)
+- [x] Doctor.tsx : connecté à la DB (remplace DOCTOR_VISITS hardcodée + suppression console.log, états loading/empty/delete)
+- [x] Vérifier sécurité : toutes les procédures sensibles utilisent protectedProcedure
+- [x] Vérifier ownership : growth + doctor-visits vérifient que l'enfant appartient à l'utilisateur connecté
+- [x] Vérifier admin : adminList + adminValidate vérifient ctx.user.role === 'admin' avec TRPCError FORBIDDEN
+- [x] Vérifier IA : invokeLLM côté serveur uniquement (analyzeWithAI + chat = protectedProcedure), clés non exposées côté client
+- [x] Vérifier variables d'environnement : BUILT_IN_FORGE_API_KEY, JWT_SECRET, RESEND_API_KEY présents dans env.ts
+- [x] 0 erreur TypeScript · 24 tests passants (7 fichiers)
