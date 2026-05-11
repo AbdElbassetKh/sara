@@ -292,3 +292,11 @@
 - [x] Vérifier IA : invokeLLM côté serveur uniquement (analyzeWithAI + chat = protectedProcedure), clés non exposées côté client
 - [x] Vérifier variables d'environnement : BUILT_IN_FORGE_API_KEY, JWT_SECRET, RESEND_API_KEY présents dans env.ts
 - [x] 0 erreur TypeScript · 24 tests passants (7 fichiers)
+
+## Phase 36 : Vérification et correction des 3 fonctionnalités clés
+- [x] السجل الزمني (Timeline) : audit complet — données réelles DB, filtres (all/meal/symptom/doctor), suppression avec confirmation, états loading/empty/error, ownership check ✅
+- [x] النشاط الأخير (Dashboard Recent Activity) : audit complet — données réelles DB via getRecentActivity, top 5 entrées triées par date, types meal/symptom avec icônes, état vide ✅
+- [x] رؤى الذكاء الاصطناعي (Insights IA) : audit complet — 6 procédures (detectCorrelations, analyzeWithAI, getSymptomTimeSeries, getSymptomFrequency, getMealSymptomHeatmap, chat) toutes connectées à la DB réelle ✅
+- [x] Correction sécurité : ajout de assertChildOwnership() dans toutes les procédures insights (6 procédures corrigées) ✅
+- [x] Tests Vitest : nouveau fichier timeline-dashboard-insights.test.ts (11 tests) couvrant les 3 fonctionnalités ✅
+- [x] 0 erreur TypeScript · 35 tests passants (8 fichiers) ✅

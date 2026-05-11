@@ -2,6 +2,22 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getFoodEntriesByChildId, getChildById, getSymptomEntriesByChildId } from "../db";
 import { invokeLLM } from "../_core/llm";
+import { getDb } from "../db";
+import { children } from "../../drizzle/schema";
+import { eq, and } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
+
+// ─── Ownership check helper ───────────────────────────────────────────────────
+async function assertChildOwnership(userId: number, childId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB not available" });
+  const rows = await db
+    .select({ id: children.id })
+    .from(children)
+    .where(and(eq(children.id, childId), eq(children.userId, userId)))
+    .limit(1);
+  if (rows.length === 0) throw new TRPCError({ code: "FORBIDDEN", message: "Child not found or access denied" });
+}
 
 // ─── Helper: calculate age in months ─────────────────────────────────────────
 function ageInMonths(birthDate: Date): number {
@@ -25,7 +41,8 @@ export const insightsRouter = router({
 
   detectCorrelations: protectedProcedure
     .input(z.object({ childId: z.number() }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      await assertChildOwnership(ctx.user.id, input.childId);
       const [meals, symptoms] = await Promise.all([
         getFoodEntriesByChildId(input.childId, 200),
         getSymptomEntriesByChildId(input.childId, 200),
@@ -92,7 +109,8 @@ export const insightsRouter = router({
    */
   analyzeWithAI: protectedProcedure
     .input(z.object({ childId: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      await assertChildOwnership(ctx.user.id, input.childId);
       const child = await getChildById(input.childId);
       if (!child) throw new Error("Child not found");
 
@@ -182,7 +200,8 @@ export const insightsRouter = router({
    */
   getSymptomTimeSeries: protectedProcedure
     .input(z.object({ childId: z.number(), days: z.number().min(7).max(90).default(30) }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      await assertChildOwnership(ctx.user.id, input.childId);
       const symptoms = await getSymptomEntriesByChildId(input.childId, 500);
       const meals    = await getFoodEntriesByChildId(input.childId, 500);
 
@@ -213,7 +232,8 @@ export const insightsRouter = router({
    */
   getSymptomFrequency: protectedProcedure
     .input(z.object({ childId: z.number(), days: z.number().min(7).max(90).default(30) }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      await assertChildOwnership(ctx.user.id, input.childId);
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       const symptoms = await getSymptomEntriesByChildId(input.childId, 500);
       const filtered = symptoms.filter(s => new Date(s.occurredAt) >= since);
@@ -248,7 +268,8 @@ export const insightsRouter = router({
    */
   getMealSymptomHeatmap: protectedProcedure
     .input(z.object({ childId: z.number(), days: z.number().min(7).max(90).default(30) }))
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
+      await assertChildOwnership(ctx.user.id, input.childId);
       const since = new Date(Date.now() - input.days * 24 * 60 * 60 * 1000);
       const [allMeals, allSymptoms] = await Promise.all([
         getFoodEntriesByChildId(input.childId, 500),
@@ -308,7 +329,8 @@ export const insightsRouter = router({
       question: z.string().min(1).max(500),
       language: z.enum(['ar', 'fr', 'en']).default('ar'),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      await assertChildOwnership(ctx.user.id, input.childId);
       const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
       const [child, meals, symptoms] = await Promise.all([
         getChildById(input.childId),
