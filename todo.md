@@ -267,3 +267,15 @@
 - [x] Mettre à jour ReportGenerator.tsx : section email bleue, champ email, bouton "Envoyer par email", état loading/succès
 - [x] Test Vitest `report.test.ts` : validation RESEND_API_KEY + génération PDF buffer (%PDF header)
 - [x] 0 erreur TypeScript · 24 tests passants (7 fichiers)
+
+## Phase 34 : Système d'abonnement Premium (CCP/BaridiMob)
+
+- [x] Migration DB : tables `subscriptions` + `payment_history` créées en base
+- [x] Routeur tRPC `subscriptions.getStatus` : isPremium + plan + premiumUntil + status
+- [x] Routeur tRPC `subscriptions.create` : soumettre une demande (pending) avec référence transaction
+- [x] Routeur tRPC `subscriptions.listHistory` : historique des paiements de l'utilisateur
+- [x] Routeur tRPC `subscriptions.adminList` + `subscriptions.adminValidate` : validation/rejet admin
+- [x] Page `Subscription.tsx` : choix formule (mensuel 500 DA / annuel 4000 DA), mode paiement CCP/BaridiMob, instructions avec copie, historique trilingue
+- [x] Route `/subscription` dans App.tsx + lien depuis Settings (sous-titre avec tarifs)
+- [x] Restriction Analyse IA + Chat IA aux abonnés Premium (toast + icône Crown)
+- [x] 0 erreur TypeScript · 24 tests passants

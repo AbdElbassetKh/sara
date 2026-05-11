@@ -35,6 +35,7 @@ const Notifications = lazy(() => import('./pages/Notifications'));
 const Appointments = lazy(() => import('./pages/Appointments'));
 const ChildSelector = lazy(() => import('./pages/ChildSelector'));
 const Doctors = lazy(() => import('./pages/Doctors'));
+const Subscription = lazy(() => import('./pages/Subscription'));
 
 function Router() {
   const { isAuthenticated, loading } = useAuth();
@@ -120,6 +121,7 @@ function Router() {
           <Route path="/notifications" component={Notifications} />
           <Route path="/appointments" component={Appointments} />
           <Route path="/doctors" component={Doctors} />
+          <Route path="/subscription" component={Subscription} />
           <Route component={NotFound} />
         </Switch>
       </Suspense>

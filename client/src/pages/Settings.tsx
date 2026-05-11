@@ -32,10 +32,10 @@ export default function Settings() {
     {
       icon: Crown,
       label: isAr ? 'AlleNest المميز' : isFr ? 'AlleNest Premium' : 'AlleNest Premium',
-      sub: isAr ? 'افتح جميع الميزات' : isFr ? 'Débloquez toutes les fonctionnalités' : 'Unlock all features',
+      sub: isAr ? 'اشتراك شهري 500 دج / سنوي 4000 دج' : isFr ? 'Mensuel 500 DA / Annuel 4 000 DA' : 'Monthly 500 DA / Yearly 4,000 DA',
       gradient: 'linear-gradient(135deg, #FFD54F, #FF8F00)',
       shadow: 'rgba(255,213,79,0.4)',
-      path: '/premium',
+      path: '/subscription',
     },
     {
       icon: Sun,

@@ -11,8 +11,9 @@ import {
 import {
   Sparkles, TrendingUp, AlertTriangle, CheckCircle, Loader2,
   ChevronLeft, ChevronRight, Brain, Link2, ShieldAlert,
-  ChevronDown, ChevronUp, BarChart2, Activity, Grid3X3
+  ChevronDown, ChevronUp, BarChart2, Activity, Grid3X3, Crown, Lock
 } from 'lucide-react';
+import { Link } from 'wouter';
 import { toast } from 'sonner';
 
 // ── Colour palette ────────────────────────────────────────────────────────────
@@ -149,6 +150,9 @@ export default function Insights() {
     { enabled: childId > 0, retry: false }
   );
 
+  // ── Subscription status ────────────────────────────────────────────────
+  const { data: subStatus } = trpc.subscriptions.getStatus.useQuery();
+  const isPremium = subStatus?.isPremium ?? false;
   // ── A  // ── AI mutation ────────────────────────────────────────────────
   const aiMutation = trpc.insights.analyzeWithAI.useMutation({
     onError: (err) => toast.error(err.message || t('Erreur IA', 'خطأ في الذكاء الاصطناعي', 'AI error')),
@@ -168,6 +172,7 @@ export default function Insights() {
 
   const handleChatSend = () => {
     const q = chatInput.trim();
+    if (!isPremium) { toast.error(t('Fonctionnalité Premium — Abonnez-vous dans Paramètres', 'ميزة مميزة — اشترك من الإعدادات', 'Premium feature — Subscribe in Settings')); return; }
     if (!q || !childId || chatMutation.isPending) return;
     setChatMessages(prev => [...prev, { role: 'user', text: q }]);
     setChatInput('');
@@ -238,14 +243,16 @@ export default function Insights() {
             </button>
             <button
               onClick={() => {
+                if (!isPremium) { toast.error(t("Fonctionnalité Premium — Abonnez-vous dans Paramètres", 'ميزة مميزة — اشترك من الإعدادات', 'Premium feature — Subscribe in Settings')); return; }
                 if (!childId) { toast.error(t("Sélectionnez un enfant d'abord", 'اختر طفلاً أولاً', 'Select a child first')); return; }
                 aiMutation.mutate({ childId });
               }}
               disabled={aiMutation.isPending || !childId}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white/20 backdrop-blur-sm text-white text-sm font-bold border border-white/30 transition-all active:scale-95 disabled:opacity-50"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-2xl backdrop-blur-sm text-white text-sm font-bold border transition-all active:scale-95 disabled:opacity-50"
+              style={{ background: isPremium ? 'rgba(255,255,255,0.2)' : 'rgba(255,213,79,0.35)', borderColor: isPremium ? 'rgba(255,255,255,0.3)' : 'rgba(255,213,79,0.6)' }}
             >
-              {aiMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Brain size={14} />}
-              {t('Analyse IA', 'تحليل الذكاء الاصطناعي', 'AI Analysis')}
+              {aiMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : isPremium ? <Brain size={14} /> : <Crown size={14} />}
+              {isPremium ? t('Analyse IA', 'تحليل الذكاء الاصطناعي', 'AI Analysis') : t('Premium', 'مميز', 'Premium')}
             </button>
           </div>
           <div className="flex items-center gap-3">
