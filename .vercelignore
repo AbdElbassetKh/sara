@@ -1,7 +1,6 @@
 # Exclude development-only files from Vercel deployment
 .manus
 .manus-logs
-patches
 fix-headers*.py
 update-headers.py
 apply-missing-tables.mjs
