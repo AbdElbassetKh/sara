@@ -3,13 +3,28 @@ import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, children, InsertChild, foodEntries, InsertFoodEntry, symptomEntries, InsertSymptomEntry, growthRecords, InsertGrowthRecord, vaccines, childVaccines, InsertChildVaccine, medicalDocuments, InsertMedicalDocument, notifications, InsertNotification, doctorVisits, InsertDoctorVisit } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
+import mysql from "mysql2/promise";
+
 let _db: ReturnType<typeof drizzle> | null = null;
 
-// Lazily create the drizzle instance so local tooling can run without a DB.
+// Serverless-safe: reuse the cached instance within the same warm Lambda/Function container.
+// On cold start a new pool is created. Pool size is intentionally small (max 3) because
+// Vercel serverless functions are short-lived and many parallel invocations would otherwise
+// exhaust free-tier MySQL connection limits.
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      const pool = mysql.createPool({
+        uri: process.env.DATABASE_URL,
+        waitForConnections: true,
+        connectionLimit: 3,
+        queueLimit: 10,
+        // Release idle connections quickly so serverless containers don't hold them open.
+        idleTimeout: 60000,
+        enableKeepAlive: true,
+        keepAliveInitialDelay: 0,
+      });
+      _db = drizzle(pool);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
