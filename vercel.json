@@ -1,49 +1,10 @@
 {
-  "version": 2,
-  "buildCommand": "vite build",
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm run build:vercel",
   "outputDirectory": "dist/public",
   "installCommand": "pnpm install",
-  "framework": null,
-  "functions": {
-    "api/index.ts": {
-      "runtime": "nodejs22.x",
-      "maxDuration": 30
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api/trpc/:path*",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/api/oauth/:path*",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/manus-storage/:path*",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/.well-known/assetlinks.json",
-      "destination": "/api/index"
-    },
-    {
-      "source": "/((?!api|manus-storage|_next|assets|favicon\\.ico|\\.well-known).*)",
-      "destination": "/index.html"
-    }
-  ],
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        { "key": "Access-Control-Allow-Credentials", "value": "true" },
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Access-Control-Allow-Methods", "value": "GET,OPTIONS,PATCH,DELETE,POST,PUT" },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version"
-        }
-      ]
-    }
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
